@@ -28,8 +28,12 @@ mainGameState.preload = function () {
     game.load.image('player', 'assets/redguy.png');
     game.load.image('line', 'assets/line.png');
     game.load.image('bubble', 'assets/speechbubble.png');
+
+    //Symbols
     game.load.image('symbol1', 'assets/symbol1.png');
     game.load.image('symbol2', 'assets/symbol2.png');
+    game.load.image('symbol3', 'assets/symbol3.png');
+    game.load.image('symbol4', 'assets/symbol4.png');
     game.load.image('menu', 'assets/menu.png');
 }
 
@@ -86,13 +90,23 @@ mainGameState.populateDictionary = function () {
     game.physics.arcade.enable(mainGameState.symbol1);
     mainGameState.symbol1.body.setCircle(32);
 
-
-
     mainGameState.symbol2 = mainGameState.dictionary.addChild(game.make.sprite(70, 30, 'symbol2'));
     mainGameState.symbol2.inputEnabled = true;
     mainGameState.symbol2.smoothed = false;
     game.physics.arcade.enable(mainGameState.symbol2);
     mainGameState.symbol2.body.setCircle(32);
+
+    mainGameState.symbol3 = mainGameState.dictionary.addChild(game.make.sprite(0, 100, 'symbol3'));
+    mainGameState.symbol3.inputEnabled = true;
+    mainGameState.symbol3.smoothed = false;
+    game.physics.arcade.enable(mainGameState.symbol3);
+    mainGameState.symbol3.body.setCircle(32);
+
+    mainGameState.symbol4 = mainGameState.dictionary.addChild(game.make.sprite(70, 100, 'symbol4'));
+    mainGameState.symbol4.inputEnabled = true;
+    mainGameState.symbol4.smoothed = false;
+    game.physics.arcade.enable(mainGameState.symbol4);
+    mainGameState.symbol4.body.setCircle(32);
 
 }
 
@@ -110,14 +124,6 @@ mainGameState.addNewPlayer = function (id, x, y) {
 
     mainGameState.playerList[id].addChild(game.make.sprite(0, -70, 'bubble'));
     mainGameState.playerList[id].children[0].visible = false;
-
-    //add symbols to the speech bubble
-    mainGameState.symbolBubble1 = mainGameState.playerList[id].children[0].addChild(game.make.sprite(0, 0, 'symbol1'));
-    mainGameState.symbolBubble1.visible = false;
-
-    mainGameState.symbolBubble2 = mainGameState.playerList[id].children[0].addChild(game.make.sprite(0, 0, 'symbol2'));
-    mainGameState.symbolBubble2.visible = false;
-    // --- End Player Initialization ---
 };
 
 mainGameState.update = function () {
@@ -126,9 +132,14 @@ mainGameState.update = function () {
 
     mainGameState.dictionary.children[0].events.onInputDown.add(mainGameState.OnSymbolDown, this);
     mainGameState.dictionary.children[1].events.onInputDown.add(mainGameState.OnSymbolDown, this);
+    mainGameState.dictionary.children[2].events.onInputDown.add(mainGameState.OnSymbolDown, this);
+    mainGameState.dictionary.children[3].events.onInputDown.add(mainGameState.OnSymbolDown, this);
 
     mainGameState.dictionary.children[0].events.onInputUp.add(mainGameState.OnSymbolUp, this);
     mainGameState.dictionary.children[1].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+    mainGameState.dictionary.children[2].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+    mainGameState.dictionary.children[3].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+
 
     if (myPlayerID >= 0) {
 
@@ -136,6 +147,10 @@ mainGameState.update = function () {
         mainGameState.playerList[myPlayerID].events.onInputUp.add(mainGameState.OnPlayerUp, this);
 
     };
+
+    if (game.time.now - mainGameState.timeCheck >= 3500 && mainGameState.destroytext) {
+        this.endSpeech();
+    }
 }
 
 mainGameState.OnSymbolDown = function (touchedbutton) {
@@ -183,33 +198,39 @@ mainGameState.speakTest = function () {
 };
 
 mainGameState.sayPhrase = function (id, phrase) {
+
+    mainGameState.idtoDestroy = id;
+
     var size = Object.keys(phrase).length;
     mainGameState.playerList[id].children[0].visible = true;
-    console.log(size);
     for (var i = 0; i <= size - 1; i++) {
-        var n = 1;
-        for (var k = mainGameState.playerList[id].children[0].children.length - 1; k >= 0; k--) {
-            var symbolSprite = mainGameState.playerList[id].children[0].children[k];
-            if (phrase[i] == symbolSprite.key) {
-                console.log("found match" + symbolSprite.key);
-                symbolSprite.visible = true;
-                symbolSprite.x = (i * 30) + 20;
-                symbolSprite.y = 10;
-                symbolSprite.z = 50;
-                symbolSprite.scale.setTo(.3, .3);
-            } else {
-                n++
-            }
-
+        if (mainGameState.playerList[id].children[0].children.length < 5) {
+            var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite((i * 15) + 10, 10, phrase[i]));
+            symbolSprite.scale.setTo(.35, .35);
         }
-
     }
+    mainGameState.timeCheck = game.time.now;
+    mainGameState.destroytext = true;
 }
 
 
 mainGameState.updateSpeak = function (id) {
     mainGameState.playerList[id].children[0].visible = !mainGameState.playerList[id].children[0].visible;
 };
+
+
+mainGameState.endSpeech = function () {
+
+    if (mainGameState.playerList[mainGameState.idtoDestroy]) {
+
+        var symbols = mainGameState.playerList[mainGameState.idtoDestroy].children[0];
+        for (var i = symbols.children.length - 1; i >= 0; i--) {
+            symbols.children[i].destroy();
+        }
+        mainGameState.playerList[mainGameState.idtoDestroy].children[0].visible = false;
+    }
+
+}
 
 //This function is intended to be able to move our circle.
 mainGameState.movePlayer = function () {
@@ -324,12 +345,7 @@ mainGameState.removePlayer = function (id) {
     delete this.playerList[id];
 };
 
-mainGameState.render = function () {
-    //    if (myPlayerID > -1) {
-    //        var player = this.playerList[myPlayerID];
-    //        game.debug.body(player);
-    //    };
-};
+mainGameState.render = function () {};
 
 game.state.add("Game", mainGameState);
 game.state.start("Game");
