@@ -138,11 +138,10 @@ mainGameState.populateSymbols = function () {
 }
 
 mainGameState.populateDictionary = function () {
-    mainGameState.dictionary = game.add.sprite(745, 300, 'dictionary');
+    mainGameState.dictionary = game.add.sprite(0, 690, 'dictionary');
     mainGameState.dictionary.alpha = 0.85;
 
-    mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(25, 230, 'dictionarylabel'));
-    mainGameState.dictionarylabel.scale.setTo(.9, .9);
+    mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(150, 75, 'dictionarylabel'));
     mainGameState.dictionarylabel.inputEnabled = true;
     mainGameState.dictionarylabel.smoothed = false;
 }
@@ -175,10 +174,6 @@ mainGameState.addNewPlayer = function (id, x, y) {
     }
 };
 
-mainGameState.roomFull = function () {
-    console.log("Sorry! Room full!");
-};
-
 mainGameState.update = function () {
     this.movePlayer();
 
@@ -187,8 +182,11 @@ mainGameState.update = function () {
         mainGameState.symbols.children[i].events.onInputUp.add(mainGameState.OnSymbolUp, this);
     }
 
-    mainGameState.dictionary.children[0].events.onInputDown.add(mainGameState.OnSymbolDown, this);
-    mainGameState.dictionary.children[0].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+    if (mainGameState.dictionary.children) {
+
+        mainGameState.dictionary.children[0].events.onInputDown.add(mainGameState.OnSymbolDown, this);
+        mainGameState.dictionary.children[0].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+    }
 
     if (myPlayerID >= 0) {
 
@@ -234,7 +232,7 @@ mainGameState.expandSymbols = function () {
 
         game.add.tween(mainGameState.symbols).to({
             x: -155
-        }, 100, Phaser.Easing.Bounce.Out, true);
+        }, 100, Phaser.Easing.Elastic.Out, true);
         flip1 = true;
     }
 }
@@ -242,14 +240,14 @@ mainGameState.expandSymbols = function () {
 mainGameState.expandDictionary = function () {
     if (flip4) {
         game.add.tween(mainGameState.dictionary).to({
-            x: 650
-        }, 1200, Phaser.Easing.Bounce.Out, true);
+            y: 100
+        }, 1000, Phaser.Easing.Bounce.Out, true);
         flip4 = false;
     } else if (!flip4) {
 
         game.add.tween(mainGameState.dictionary).to({
-            x: 750
-        }, 100, Phaser.Easing.Bounce.Out, true);
+            y: 690
+        }, 400, Phaser.Easing.Elastic.Out, true);
         flip4 = true;
     }
 }
