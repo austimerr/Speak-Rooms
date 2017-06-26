@@ -14,13 +14,14 @@ Client.updatePosition = function (data) {
     Client.socket.emit('move', data);
 };
 
-Client.speak = function () {
-    Client.socket.emit('speak');
-};
 
 Client.sendPhrase = function (data) {
     console.log("client" + data[0]);
     Client.socket.emit('phrase', data);
+};
+
+Client.requestEndSpeech = function () {
+    Client.socket.emit('endspeech');
 };
 
 
@@ -44,14 +45,15 @@ Client.socket.on('move', function (data) {
     mainGameState.updateOtherPlayer(data.id, data.x, data.y);
 });
 
-Client.socket.on('speak', function (data) {
-    mainGameState.updateSpeak(data.id);
-});
 
 Client.socket.on('phrase', function (data) {
     console.log("client info " +
         data.id, data.phrase);
     mainGameState.sayPhrase(data.id, data.phrase);
+});
+
+Client.socket.on('endspeech', function () {
+    mainGameState.endSpeech();
 });
 
 Client.socket.on('remove', function (id) {

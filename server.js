@@ -68,15 +68,15 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('move', socket.player);
         });
 
-        socket.on('speak', function (data) {
-            io.emit('speak', socket.player);
-        });
-
         socket.on('phrase', function (data) {
             socket.player.phrase = data;
             console.log(socket.player.phrase);
             console.log(socket.player);
             io.emit('phrase', socket.player);
+        });
+
+        socket.on('endspeech', function () {
+            io.emit('endspeech');
         });
 
         socket.on('disconnect', function () {
@@ -96,6 +96,7 @@ function getAllPlayers() {
     });
     return collectedPlayers;
 }
+
 
 function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
