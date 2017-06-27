@@ -11,6 +11,8 @@ var flip1 = true;
 var flip2 = true;
 var flip3 = true;
 var flip4 = true;
+var flip5 = true;
+var flip6 = true;
 
 
 var game = new Phaser.Game(
@@ -37,9 +39,14 @@ mainGameState.preload = function () {
     game.load.image('symbol3', 'assets/symbol3.png');
     game.load.image('symbol4', 'assets/symbol4.png');
     game.load.image('menu', 'assets/menu.png');
+    game.load.image('open', 'assets/opentab.png');
+    game.load.image('clear', 'assets/clear.png');
+
     game.load.image('dictionary', 'assets/dictionarymenu.png');
     game.load.image('dictionarylabel', 'assets/dictionarylabel.png');
-    game.load.image('open', 'assets/opentab.png');
+    game.load.image('symbolspace', 'assets/symbolspace.png');
+    game.load.image('checkbox', 'assets/checkbox.png');
+    game.load.image('check', 'assets/check.png');
 
     game.load.audio('grunt', 'assets/grunt.wav');
     game.load.audio('click', 'assets/click.wav');
@@ -111,6 +118,10 @@ mainGameState.populateSymbols = function () {
     mainGameState.open.inputEnabled = true;
     mainGameState.open.smoothed = false;
 
+    mainGameState.clear = mainGameState.symbols.addChild(game.make.sprite(20, 250, 'clear'));
+    mainGameState.clear.inputEnabled = true;
+    mainGameState.clear.smoothed = false;
+
     mainGameState.symbol1 = mainGameState.symbols.addChild(game.make.sprite(0, 30, 'symbol1'));
     mainGameState.symbol1.inputEnabled = true;
     mainGameState.symbol1.smoothed = false;
@@ -135,15 +146,57 @@ mainGameState.populateSymbols = function () {
     game.physics.arcade.enable(mainGameState.symbol4);
     mainGameState.symbol4.body.setCircle(32);
 
+    mainGameState.symbollength = mainGameState.symbols.children.length - 1;
+
 }
 
 mainGameState.populateDictionary = function () {
     mainGameState.dictionary = game.add.sprite(0, 690, 'dictionary');
     mainGameState.dictionary.alpha = 0.85;
 
-    mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(150, 75, 'dictionarylabel'));
+    mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(480, 75, 'dictionarylabel'));
     mainGameState.dictionarylabel.inputEnabled = true;
     mainGameState.dictionarylabel.smoothed = false;
+
+    mainGameState.dictionarytext = mainGameState.dictionary.addChild(game.add.text(400, 200, 'Reach Agreement, Define Meaning', {
+        font: '32px Georgia',
+        fill: '#000000',
+        align: 'center'
+    }));
+    mainGameState.dictionarytext.anchor.setTo(0.5, 0.5);
+
+    mainGameState.definition1 = mainGameState.dictionary.addChild(game.add.text(100, 300, 'Green: ', {
+        font: '28px Georgia',
+        fill: '#000000',
+        align: 'left'
+    }));
+    mainGameState.definition1.anchor.setTo(0.5, 0.5);
+    var symbolspace = mainGameState.definition1.addChild(game.make.sprite(120, -10, 'symbolspace'));
+    symbolspace.anchor.setTo(0.5, 0.5);
+    symbolspace.inputEnabled = true;
+    var checkbox = mainGameState.definition1.addChild(game.make.sprite(250, -10, 'checkbox'));
+    checkbox.anchor.setTo(0.5, 0.5);
+    checkbox.inputEnabled = true;
+    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+    check.anchor.setTo(0.5, 0.5);
+    check.visible = false;
+
+
+    mainGameState.definition2 = mainGameState.dictionary.addChild(game.add.text(450, 300, 'Red: ', {
+        font: '28px Georgia',
+        fill: '#000000',
+        align: 'left'
+    }));
+    mainGameState.definition2.anchor.setTo(0.5, 0.5);
+    symbolspace = mainGameState.definition2.addChild(game.make.sprite(110, -10, 'symbolspace'));
+    symbolspace.anchor.setTo(0.5, 0.5);
+    symbolspace.inputEnabled = true;
+    checkbox = mainGameState.definition2.addChild(game.make.sprite(250, -10, 'checkbox'));
+    checkbox.anchor.setTo(0.5, 0.5);
+    checkbox.inputEnabled = true;
+    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+    check.anchor.setTo(0.5, 0.5);
+    check.visible = false;
 }
 
 mainGameState.addNewPlayer = function (id, x, y) {
@@ -158,6 +211,10 @@ mainGameState.addNewPlayer = function (id, x, y) {
     mainGameState.playerList[id].inputEnabled = true;
 
     game.world.swap(mainGameState.playerList[id], mainGameState.symbols);
+
+    if (id == 2) {
+        game.world.swap(mainGameState.playerList[id], mainGameState.dictionary);
+    }
 
     if (id == 1) {
 
@@ -195,32 +252,104 @@ mainGameState.update = function () {
 
     };
 
+    //place in for loop later
+
+    mainGameState.definition1.children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+    mainGameState.definition1.children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+    mainGameState.definition1.children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+    mainGameState.definition1.children[1].events.onInputUp.add(mainGameState.OnDefineUp, this);
+
+    mainGameState.definition2.children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+    mainGameState.definition2.children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+    mainGameState.definition2.children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+    mainGameState.definition2.children[1].events.onInputUp.add(mainGameState.OnDefineUp, this);
+
+
     //    if (game.time.now - mainGameState.timeCheck >= 4500 && mainGameState.destroytext) {
     //        this.endSpeech();
     //    }
+}
+
+mainGameState.OnDefineDown = function (touchedbutton) {
+    if (flip5) {
+        if (touchedbutton.key == 'checkbox') {
+            mainGameState.clickSound.play();
+            touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
+
+            if (touchedbutton == mainGameState.definition1.children[1]) {
+                var symbolsToSend = mainGameState.definition1.children[0].children;
+                console.log(symbolsToSend);
+            } else if (touchedbutton == mainGameState.definition2.children[1]) {
+                var symbolsToSend = mainGameState.definition2.children[0].children;
+                console.log(symbolsToSend);
+            }
+        }
+
+        if (touchedbutton.key == 'symbolspace') {
+            mainGameState.clickSound.play();
+            touchedbutton.children = [];
+            for (var i = 0; i <= Object.keys(mainGameState.phrase).length - 1; i++) {
+                if (i < 5) {
+                    var symbolInBlank = touchedbutton.addChild(game.make.sprite(((i * 35) - 50), 0, mainGameState.phrase[i]));
+                    symbolInBlank.anchor.setTo(0.5, 0.5);
+                    symbolInBlank.scale.setTo(0.6, 0.6);
+                    console.log("Test");
+                }
+            }
+        }
+        flip5 = false;
+    }
+
+}
+
+mainGameState.OnDefineUp = function (touchedbutton) {
+    flip5 = true;
 }
 
 mainGameState.OnSymbolDown = function (touchedbutton) {
 
     if (flip2) {
         mainGameState.clickSound.play();
-        if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel') {
+        if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel' && touchedbutton.key != 'clear') {
             game.add.tween(touchedbutton).to({
                 x: touchedbutton.x - 5
             }, 20, Phaser.Easing.Bounce.Out, true);
             mainGameState.phrase[mainGameState.word] = touchedbutton.key;
             mainGameState.word++;
+            if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) < 5) {
+                var typedsprite = mainGameState.symbols.addChild(game.make.sprite(0, 200, touchedbutton.key));
+                typedsprite.x = ((((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) * 28) - 28);
+                typedsprite.scale.setTo(.5, .5);
+            }
+
         } else if (touchedbutton.key == 'open') {
             touchedbutton.visible = false;
             mainGameState.expandSymbols();
         } else if (touchedbutton.key == 'dictionarylabel') {
             touchedbutton.visible = false;
             mainGameState.expandDictionary();
+        } else if (touchedbutton.key == 'clear') {
+            game.add.tween(touchedbutton).to({
+                x: touchedbutton.x - 5
+            }, 20, Phaser.Easing.Bounce.Out, true);
+            mainGameState.Clear(touchedbutton);
         }
         flip2 = false;
 
     }
 }
+
+mainGameState.OnSymbolUp = function (touchedbutton) {
+    touchedbutton.visible = true;
+    if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel') {
+        game.add.tween(touchedbutton).to({
+            x: touchedbutton.x + 5
+        }, 20, Phaser.Easing.Linear.Out, true);
+    }
+    flip2 = true;
+    flip6 = true;
+}
+
 
 mainGameState.expandSymbols = function () {
     if (flip1) {
@@ -237,6 +366,19 @@ mainGameState.expandSymbols = function () {
     }
 }
 
+mainGameState.Clear = function (touchedbutton) {
+    if (flip6) {
+        for (i = mainGameState.symbols.children.length - 1; i > mainGameState.symbollength; i--) {
+            console.log("for loop working");
+            mainGameState.symbols.children[i].destroy();
+        }
+        mainGameState.word = 0;
+        mainGameState.phrase = [];
+        flip6 = false;
+    }
+
+};
+
 mainGameState.expandDictionary = function () {
     if (flip4) {
         game.add.tween(mainGameState.dictionary).to({
@@ -251,18 +393,14 @@ mainGameState.expandDictionary = function () {
         flip4 = true;
     }
 }
-mainGameState.OnSymbolUp = function (touchedbutton) {
-    touchedbutton.visible = true;
-    if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel') {
-        game.add.tween(touchedbutton).to({
-            x: touchedbutton.x + 5
-        }, 20, Phaser.Easing.Linear.Out, true);
-    }
-    flip2 = true;
-}
 
 mainGameState.OnPlayerDown = function () {
     if (flip3) {
+        if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) != 0) {
+            for (var i = mainGameState.symbols.children.length - 1; i > mainGameState.symbollength; i--) {
+                mainGameState.symbols.children[i].destroy();
+            }
+        }
         if (mainGameState.playerList[mainGameState.idtoDestroy]) {
             if (mainGameState.idtoDestroy == myPlayerID) {
 

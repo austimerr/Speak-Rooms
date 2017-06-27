@@ -80,7 +80,9 @@ io.on('connection', function (socket) {
         });
 
         socket.on('disconnect', function () {
-            io.emit('remove', socket.player.id);
+            if (socket.player) {
+                io.emit('remove', socket.player.id);
+            }
         });
     });
 });
