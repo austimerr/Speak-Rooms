@@ -86,11 +86,11 @@ io.on('connection', function (socket) {
                     //if loop can successfully check up to length then send match message 
                     var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
-                    if (size1 && size2 >= 0) {
+                    if (size1 >= 0 && size2 >= 0) {
                         if (size1 == size2) {
                             for (var i = 0; i <= size1; i++) {
                                 if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                    console.log("no match");
+                                    console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
                                     return;
                                 }
                                 if (i == size1) {
@@ -100,10 +100,10 @@ io.on('connection', function (socket) {
                             }
 
                         } else {
-                            console.log("no match");
+                            console.log("no match, sizes not equal");
                         }
                     } else {
-                        console.log("no match");
+                        console.log("no match, sizes not greater than or equal to 0");
                     }
                 }
             }
@@ -117,11 +117,11 @@ io.on('connection', function (socket) {
 
                     var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
-                    if (size1 && size2 >= 0) {
+                    if (size1 >= 0 && size2 >= 0) {
                         if (size1 == size2) {
                             for (var i = 0; i <= size1; i++) {
                                 if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                    console.log("no match");
+                                    console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
                                     return;
                                 }
                                 if (i == size1) {
@@ -131,10 +131,10 @@ io.on('connection', function (socket) {
                             }
 
                         } else {
-                            console.log("no match");
+                            console.log("no match, sizes not equal");
                         }
                     } else {
-                        console.log("no match");
+                        console.log("no match, sizes not greater than or equal to 0");
                     }
                 }
             }

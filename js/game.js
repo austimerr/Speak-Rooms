@@ -178,6 +178,7 @@ mainGameState.populateDictionary = function () {
     mainGameState.dictionarytext.anchor.setTo(0.5, 0.5);
 
     //EACH DEFINTION-SYMBOL COMBO REQUIRES THIS BLOCK OF CODE RIGHT NOW. MAYBE SWITCH TO A MORE GENERAL FORMAT?
+    //WHEN YOU WANT TO SEARCH THROUGH THE ACTUAL DEFINED WORDS START WITH I = 2 (INDEX OF GREEN IN CHILDREN)
 
     mainGameState.definition1 = mainGameState.dictionary.addChild(game.add.text(100, 300, 'Green: ', {
         font: '28px Georgia',
@@ -216,7 +217,73 @@ mainGameState.populateDictionary = function () {
     var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
     check.anchor.setTo(0.5, 0.5);
     check.visible = false;
+
+    mainGameState.definition3 = mainGameState.dictionary.addChild(game.add.text(100, 400, 'Circle: ', {
+        font: '28px Georgia',
+        fill: '#000000',
+        align: 'left'
+    }));
+    mainGameState.definition3.anchor.setTo(0.5, 0.5);
+    symbolspace = mainGameState.definition3.addChild(game.make.sprite(110, -10, 'symbolspace'));
+    symbolspace.anchor.setTo(0.5, 0.5);
+    symbolspace.inputEnabled = true;
+    checkbox = mainGameState.definition3.addChild(game.make.sprite(250, -10, 'checkbox'));
+    checkbox.anchor.setTo(0.5, 0.5);
+    checkbox.inputEnabled = true;
+    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+    check.anchor.setTo(0.5, 0.5);
+    check.visible = false;
+
+    mainGameState.definition4 = mainGameState.dictionary.addChild(game.add.text(450, 400, 'Square: ', {
+        font: '28px Georgia',
+        fill: '#000000',
+        align: 'left'
+    }));
+    mainGameState.definition4.anchor.setTo(0.5, 0.5);
+    symbolspace = mainGameState.definition4.addChild(game.make.sprite(110, -10, 'symbolspace'));
+    symbolspace.anchor.setTo(0.5, 0.5);
+    symbolspace.inputEnabled = true;
+    checkbox = mainGameState.definition4.addChild(game.make.sprite(250, -10, 'checkbox'));
+    checkbox.anchor.setTo(0.5, 0.5);
+    checkbox.inputEnabled = true;
+    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+    check.anchor.setTo(0.5, 0.5);
+    check.visible = false;
+
+
+    mainGameState.definition5 = mainGameState.dictionary.addChild(game.add.text(100, 500, 'Player\nAbove: ', {
+        font: '28px Georgia',
+        fill: '#000000',
+        align: 'left'
+    }));
+    mainGameState.definition5.anchor.setTo(0.5, 0.5);
+    symbolspace = mainGameState.definition5.addChild(game.make.sprite(110, -10, 'symbolspace'));
+    symbolspace.anchor.setTo(0.5, 0.5);
+    symbolspace.inputEnabled = true;
+    checkbox = mainGameState.definition5.addChild(game.make.sprite(250, -10, 'checkbox'));
+    checkbox.anchor.setTo(0.5, 0.5);
+    checkbox.inputEnabled = true;
+    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+    check.anchor.setTo(0.5, 0.5);
+    check.visible = false;
+
+    mainGameState.definition6 = mainGameState.dictionary.addChild(game.add.text(450, 500, 'Player\nBelow: ', {
+        font: '28px Georgia',
+        fill: '#000000',
+        align: 'left'
+    }));
+    mainGameState.definition6.anchor.setTo(0.5, 0.5);
+    symbolspace = mainGameState.definition6.addChild(game.make.sprite(110, -10, 'symbolspace'));
+    symbolspace.anchor.setTo(0.5, 0.5);
+    symbolspace.inputEnabled = true;
+    checkbox = mainGameState.definition6.addChild(game.make.sprite(250, -10, 'checkbox'));
+    checkbox.anchor.setTo(0.5, 0.5);
+    checkbox.inputEnabled = true;
+    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+    check.anchor.setTo(0.5, 0.5);
+    check.visible = false;
 }
+
 
 mainGameState.addNewPlayer = function (id, x, y) {
     text.visible = false;
@@ -274,15 +341,15 @@ mainGameState.update = function () {
 
     };
 
-    mainGameState.definition1.children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-    mainGameState.definition1.children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
-    mainGameState.definition1.children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-    mainGameState.definition1.children[1].events.onInputUp.add(mainGameState.OnDefineUp, this);
-
-    mainGameState.definition2.children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-    mainGameState.definition2.children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
-    mainGameState.definition2.children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-    mainGameState.definition2.children[1].events.onInputUp.add(mainGameState.OnDefineUp, this);
+    //FOR LOOP FOR THE DEFINED WORDS
+    for (i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
+        if (mainGameState.dictionary.children[i]) {
+            mainGameState.dictionary.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+            mainGameState.dictionary.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineUp, this);
+            mainGameState.dictionary.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+            mainGameState.dictionary.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+        }
+    }
 }
 
 mainGameState.OnDefineDown = function (touchedbutton) {
@@ -291,51 +358,58 @@ mainGameState.OnDefineDown = function (touchedbutton) {
         if (touchedbutton.key == 'checkbox') {
             mainGameState.clickSound.play();
 
-            //MAKES GREEN CHECK APPEAR ON TOGGLE
-            if (touchedbutton == mainGameState.definition1.children[1]) {
-                touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
-                if (touchedbutton.children[0].visible) {
-                    Client.sendForCompare({
-                        id: myPlayerID,
-                        phrase: mainGameState.phrasetoCompare,
-                        word: "definition1"
-                    });
-                }
+            //CHECKS MATCHING WORD SYMBOL COMBO IN YOUR DICTIONARY
+            //SENDS SAID MATCH TO THE SERVER
+            for (var i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
+                //searches all word checkmarks
+                if (touchedbutton == mainGameState.dictionary.children[i].children[1]) {
+                    touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
+                    if (touchedbutton.children[0].visible) {
+                        console.log(mainGameState.phrasetoCompare);
+                        Client.sendForCompare({
+                            id: myPlayerID,
+                            phrase: mainGameState.phrasetoCompare,
+                            word: i
+                        });
+                    }
 
-            }
-
-            if (touchedbutton == mainGameState.definition2.children[1]) {
-                touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
-                if (touchedbutton.children[0].visible) {
-                    Client.sendForCompare({
-                        id: myPlayerID,
-                        phrase: mainGameState.phrasetoCompare,
-                        word: "definition2"
-                    });
                 }
             }
         }
 
         if (touchedbutton.key == 'symbolspace') {
-            mainGameState.clickSound.play();
-            //CLEARS OUT CHILDREN ARRAY OF THE SYMBOLSPACE YOU HIT
-            touchedbutton.children = [];
-            mainGameState.phrasetoCompare = [];
-            //FILLS OUT CHILDREN ARRAY OF SYMBOLSPACE YOU HIT BASED ON CURRENT PHRASE IN SYMBOL MENU
-            for (var i = 0; i <= Object.keys(mainGameState.phrase).length - 1; i++) {
-                if (i < 5) {
-                    var symbolInBlank = touchedbutton.addChild(game.make.sprite(((i * 35) - 50), 0, mainGameState.phrase[i]));
-                    mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
-                    symbolInBlank.anchor.setTo(0.5, 0.5);
-                    symbolInBlank.scale.setTo(0.6, 0.6);
+            for (var i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
+                if (touchedbutton == mainGameState.dictionary.children[i].children[0]) {
+                    if (mainGameState.dictionary.children[i].children[1].visible) {
+                        var edit = true;
+                    } else {
+                        edit = false;
+                    }
+                }
+            }
+            if (edit) {
+                mainGameState.clickSound.play();
+                //CLEARS OUT CHILDREN ARRAY OF THE SYMBOLSPACE YOU HIT
+                touchedbutton.children = [];
+                mainGameState.phrasetoCompare = [];
+                //FILLS OUT CHILDREN ARRAY OF SYMBOLSPACE YOU HIT BASED ON CURRENT PHRASE IN SYMBOL MENU
+                for (var i = 0; i <= Object.keys(mainGameState.phrase).length - 1; i++) {
+                    //input of symbols needs to only be allowed when checkbox is visible 
+                    if (i < 5) {
+                        var symbolInBlank = touchedbutton.addChild(game.make.sprite(((i * 35) - 50), 0, mainGameState.phrase[i]));
+                        mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
+                        symbolInBlank.anchor.setTo(0.5, 0.5);
+                        symbolInBlank.scale.setTo(0.6, 0.6);
+                    }
+
                 }
 
-            }
-
-            if (touchedbutton == mainGameState.definition1.children[0]) {
-                mainGameState.definition1.children[1].children[0].visible = false;
-            } else if (touchedbutton == mainGameState.definition2.children[0]) {
-                mainGameState.definition2.children[1].children[0].visible = false;
+                //TURNS OFF CHECKMARK IF YOU CHANGE INPUT
+                for (i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
+                    if (touchedbutton == mainGameState.dictionary.children[i].children[0]) {
+                        mainGameState.dictionary.children[i].children[1].children[0].visible = false;
+                    }
+                }
             }
         }
         flip5 = false;
@@ -351,6 +425,10 @@ mainGameState.OnDefineUp = function (touchedbutton) {
 mainGameState.match = function (word, phrase) {
     console.log("match with " + word + " of phrase " +
         phrase);
+    //this needs to lock down the correct symbol combo
+    //this should probably be based on the "word"
+    //word should be able to be inserted into a path
+    mainGameState.dictionary.children[word].children[1].visible = false;
 }
 
 mainGameState.OnSymbolDown = function (touchedbutton) {
