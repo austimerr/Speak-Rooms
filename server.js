@@ -75,6 +75,72 @@ io.on('connection', function (socket) {
             io.emit('phrase', socket.player);
         });
 
+        socket.on('1compare', function (data) {
+            httpServer.p1data = data;
+            if (httpServer.p2data) {
+                if (httpServer.p1data.word == httpServer.p2data.word) {
+                    console.log("word match");
+                    //for loop?
+                    //this loop has to go through the length of phrase
+                    //if index of one does not = index of other exit loop
+                    //if loop can successfully check up to length then send match message 
+                    var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
+                    var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
+                    if (size1 && size2 >= 0) {
+                        if (size1 == size2) {
+                            for (var i = 0; i <= size1; i++) {
+                                if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
+                                    console.log("no match");
+                                    return;
+                                }
+                                if (i == size1) {
+                                    console.log("matching phrases");
+                                    io.emit("match", httpServer.p1data);
+                                }
+                            }
+
+                        } else {
+                            console.log("no match");
+                        }
+                    } else {
+                        console.log("no match");
+                    }
+                }
+            }
+        });
+
+        socket.on('2compare', function (data) {
+            httpServer.p2data = data;
+            if (httpServer.p1data) {
+                if (httpServer.p2data.word == httpServer.p1data.word) {
+                    console.log("word match");
+
+                    var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
+                    var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
+                    if (size1 && size2 >= 0) {
+                        if (size1 == size2) {
+                            for (var i = 0; i <= size1; i++) {
+                                if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
+                                    console.log("no match");
+                                    return;
+                                }
+                                if (i == size1) {
+                                    console.log("matching phrases");
+                                    io.emit("match", httpServer.p1data);
+                                }
+                            }
+
+                        } else {
+                            console.log("no match");
+                        }
+                    } else {
+                        console.log("no match");
+                    }
+                }
+            }
+
+        });
+
         socket.on('endspeech', function () {
             io.emit('endspeech');
         });

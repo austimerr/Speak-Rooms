@@ -16,8 +16,15 @@ Client.updatePosition = function (data) {
 
 
 Client.sendPhrase = function (data) {
-    console.log("client" + data[0]);
     Client.socket.emit('phrase', data);
+};
+
+Client.sendForCompare = function (data) {
+    if (data.id == 1) {
+        Client.socket.emit('1compare', data);
+    } else if (data.id == 2) {
+        Client.socket.emit('2compare', data);
+    }
 };
 
 Client.requestEndSpeech = function () {
@@ -51,6 +58,11 @@ Client.socket.on('phrase', function (data) {
         data.id, data.phrase);
     mainGameState.sayPhrase(data.id, data.phrase);
 });
+
+Client.socket.on('match', function (data) {
+    mainGameState.match(data.word, data.phrase);
+});
+
 
 Client.socket.on('endspeech', function () {
     mainGameState.endSpeech();

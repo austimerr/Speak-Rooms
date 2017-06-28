@@ -7,12 +7,14 @@ var MOVEMENT = 7;
 
 var myPlayerID = -1;
 
+//VARIOUS TOGGLES 
 var flip1 = true;
 var flip2 = true;
 var flip3 = true;
 var flip4 = true;
 var flip5 = true;
 var flip6 = true;
+
 
 
 var game = new Phaser.Game(
@@ -56,26 +58,24 @@ mainGameState.create = function () {
     game.renderer.renderSession.roundPixels = true;
     game.stage.disableVisibilityChange = true;
     this.playerList = {};
+    mainGameState.phrasetoCompare = [];
 
-    //Start the physics
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    // Player Initialization has moved to addNewPlayer
-
-    //Nice dusty lavender background, instead of black.
     game.stage.backgroundColor = "#737c93";
 
     mainGameState.gruntSound = game.add.audio('grunt');
     mainGameState.clickSound = game.add.audio('click');
 
-    // Arrow keys and spacebar only affect game.
+
     game.input.keyboard.addKeyCapture(
       [Phaser.Keyboard.UP, Phaser.Keyboard.DOWN,
       Phaser.Keyboard.LEFT, Phaser.Keyboard.RIGHT,
       Phaser.Keyboard.SPACEBAR]);
 
-    //Allow arrow key inputs
+
     this.cursor = game.input.keyboard.createCursorKeys();
+
     //Allow WASD inputs
     this.wasd = {
         up: game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -91,9 +91,13 @@ mainGameState.create = function () {
     mainGameState.line = game.add.sprite(400, 400, 'line');
     mainGameState.line.anchor.setTo(0.5, 0.5);
 
+    //UI FUNCTION
+
     mainGameState.populateSymbols();
     mainGameState.populateDictionary();
     Client.askNewPlayer();
+
+    //TEXT TO BE SEEN WHEN A PLAYER IS UNABLE TO PLAY
 
     text = game.add.text(game.world.centerX, 250, ' Sorry, this room is full.');
     text.anchor.set(0.5);
@@ -106,6 +110,9 @@ mainGameState.create = function () {
 };
 
 mainGameState.populateSymbols = function () {
+
+    //THIS FUNCTION FILLS OUT THE MENU ON THE LEFT OF THE SCREEN
+    //ACTS AS A KEYBOARD
 
     mainGameState.phrase = {};
     mainGameState.word = 0;
@@ -146,11 +153,16 @@ mainGameState.populateSymbols = function () {
     game.physics.arcade.enable(mainGameState.symbol4);
     mainGameState.symbol4.body.setCircle(32);
 
+    //THIS SYMBOL LENGTH IS USED TO REVERT BACK TO DEFAULT CHILD LENGTH LATER
+
     mainGameState.symbollength = mainGameState.symbols.children.length - 1;
 
 }
 
 mainGameState.populateDictionary = function () {
+
+    //POPULATES THE DICTIONARY MENU AT THE BOTTOM OF THE SCREEN 
+
     mainGameState.dictionary = game.add.sprite(0, 690, 'dictionary');
     mainGameState.dictionary.alpha = 0.85;
 
@@ -165,23 +177,30 @@ mainGameState.populateDictionary = function () {
     }));
     mainGameState.dictionarytext.anchor.setTo(0.5, 0.5);
 
+    //EACH DEFINTION-SYMBOL COMBO REQUIRES THIS BLOCK OF CODE RIGHT NOW. MAYBE SWITCH TO A MORE GENERAL FORMAT?
+
     mainGameState.definition1 = mainGameState.dictionary.addChild(game.add.text(100, 300, 'Green: ', {
         font: '28px Georgia',
         fill: '#000000',
         align: 'left'
     }));
     mainGameState.definition1.anchor.setTo(0.5, 0.5);
+    //PLAYERS CAN CLICK ON SYMBOL SPACE TO FILL IT WITH SYMBOLS
+
     var symbolspace = mainGameState.definition1.addChild(game.make.sprite(120, -10, 'symbolspace'));
     symbolspace.anchor.setTo(0.5, 0.5);
     symbolspace.inputEnabled = true;
+    //PLAYERS CAN CLICK ON CHECKBOX TO SEND SYMBOL COMBO TO SERVER TO COMPARE WITH TEAMMATE
+
     var checkbox = mainGameState.definition1.addChild(game.make.sprite(250, -10, 'checkbox'));
     checkbox.anchor.setTo(0.5, 0.5);
     checkbox.inputEnabled = true;
+    //CHECK WILL APPEAR WHEN CHECKBOX IS CLICKED
     var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
     check.anchor.setTo(0.5, 0.5);
     check.visible = false;
 
-
+    //DEFINITION 2 BLOCK
     mainGameState.definition2 = mainGameState.dictionary.addChild(game.add.text(450, 300, 'Red: ', {
         font: '28px Georgia',
         fill: '#000000',
@@ -210,6 +229,7 @@ mainGameState.addNewPlayer = function (id, x, y) {
     mainGameState.playerList[id].body.collideWorldBounds = true;
     mainGameState.playerList[id].inputEnabled = true;
 
+    //PROPERLY LAYERS PLAYERS ON THE Z AXIS
     game.world.swap(mainGameState.playerList[id], mainGameState.symbols);
 
     if (id == 2) {
@@ -217,14 +237,14 @@ mainGameState.addNewPlayer = function (id, x, y) {
     }
 
     if (id == 1) {
-
+        //SETS UP THE SPEECH BUBBLES FOR PLAYER 1
         mainGameState.playerList[id].addChild(game.make.sprite(0, 45, 'bubble1'));
         mainGameState.playerList[id].children[0].visible = false;
         mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
     }
 
     if (id == 2) {
-
+        //SETS UP THE SPEECH BUBBLES FOR PLAYER 2
         mainGameState.playerList[id].addChild(game.make.sprite(0, -35, 'bubble2'));
         mainGameState.playerList[id].children[0].visible = false;
         mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
@@ -233,6 +253,8 @@ mainGameState.addNewPlayer = function (id, x, y) {
 
 mainGameState.update = function () {
     this.movePlayer();
+
+    //DIRECT MOUSE IMPUT TO VARIOUS FUNCTIONS. SHORTEN LATER THROUGH LOOPS
 
     for (var i = 0; i <= mainGameState.symbols.children.length - 1; i++) {
         mainGameState.symbols.children[i].events.onInputDown.add(mainGameState.OnSymbolDown, this);
@@ -252,8 +274,6 @@ mainGameState.update = function () {
 
     };
 
-    //place in for loop later
-
     mainGameState.definition1.children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
     mainGameState.definition1.children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
     mainGameState.definition1.children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
@@ -263,65 +283,97 @@ mainGameState.update = function () {
     mainGameState.definition2.children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
     mainGameState.definition2.children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
     mainGameState.definition2.children[1].events.onInputUp.add(mainGameState.OnDefineUp, this);
-
-
-    //    if (game.time.now - mainGameState.timeCheck >= 4500 && mainGameState.destroytext) {
-    //        this.endSpeech();
-    //    }
 }
 
 mainGameState.OnDefineDown = function (touchedbutton) {
+    //WHEN A PLAYER PRESSES EITHER CHECKBOX OR SYMBOLSPACE THIS FUNCTION IS CALLED
     if (flip5) {
         if (touchedbutton.key == 'checkbox') {
             mainGameState.clickSound.play();
-            touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
 
+            //MAKES GREEN CHECK APPEAR ON TOGGLE
             if (touchedbutton == mainGameState.definition1.children[1]) {
-                var symbolsToSend = mainGameState.definition1.children[0].children;
-                console.log(symbolsToSend);
-            } else if (touchedbutton == mainGameState.definition2.children[1]) {
-                var symbolsToSend = mainGameState.definition2.children[0].children;
-                console.log(symbolsToSend);
+                touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
+                if (touchedbutton.children[0].visible) {
+                    Client.sendForCompare({
+                        id: myPlayerID,
+                        phrase: mainGameState.phrasetoCompare,
+                        word: "definition1"
+                    });
+                }
+
+            }
+
+            if (touchedbutton == mainGameState.definition2.children[1]) {
+                touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
+                if (touchedbutton.children[0].visible) {
+                    Client.sendForCompare({
+                        id: myPlayerID,
+                        phrase: mainGameState.phrasetoCompare,
+                        word: "definition2"
+                    });
+                }
             }
         }
 
         if (touchedbutton.key == 'symbolspace') {
             mainGameState.clickSound.play();
+            //CLEARS OUT CHILDREN ARRAY OF THE SYMBOLSPACE YOU HIT
             touchedbutton.children = [];
+            mainGameState.phrasetoCompare = [];
+            //FILLS OUT CHILDREN ARRAY OF SYMBOLSPACE YOU HIT BASED ON CURRENT PHRASE IN SYMBOL MENU
             for (var i = 0; i <= Object.keys(mainGameState.phrase).length - 1; i++) {
                 if (i < 5) {
                     var symbolInBlank = touchedbutton.addChild(game.make.sprite(((i * 35) - 50), 0, mainGameState.phrase[i]));
+                    mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
                     symbolInBlank.anchor.setTo(0.5, 0.5);
                     symbolInBlank.scale.setTo(0.6, 0.6);
-                    console.log("Test");
                 }
+
+            }
+
+            if (touchedbutton == mainGameState.definition1.children[0]) {
+                mainGameState.definition1.children[1].children[0].visible = false;
+            } else if (touchedbutton == mainGameState.definition2.children[0]) {
+                mainGameState.definition2.children[1].children[0].visible = false;
             }
         }
         flip5 = false;
-    }
 
+    }
 }
+
 
 mainGameState.OnDefineUp = function (touchedbutton) {
     flip5 = true;
+}
+
+mainGameState.match = function (word, phrase) {
+    console.log("match with " + word + " of phrase " +
+        phrase);
 }
 
 mainGameState.OnSymbolDown = function (touchedbutton) {
 
     if (flip2) {
         mainGameState.clickSound.play();
+
+        //ANIMATES THE SYMBOL YOU CLICKED AND ADDS THE KEY OF SAID SYMBOL TO AN OBJECT CALLED PHRASE 
         if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel' && touchedbutton.key != 'clear') {
             game.add.tween(touchedbutton).to({
                 x: touchedbutton.x - 5
             }, 20, Phaser.Easing.Bounce.Out, true);
             mainGameState.phrase[mainGameState.word] = touchedbutton.key;
             mainGameState.word++;
+
+            //SHOWS THE SYMBOLS YOU ARE TYPING IN THE SYMBOL MENU AS YOU TYPE
             if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) < 5) {
                 var typedsprite = mainGameState.symbols.addChild(game.make.sprite(0, 200, touchedbutton.key));
                 typedsprite.x = ((((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) * 28) - 28);
                 typedsprite.scale.setTo(.5, .5);
             }
 
+            //REDIRECTS THE SPECIAL BUTTONS TO THEIR OWN FUNCTIONS 
         } else if (touchedbutton.key == 'open') {
             touchedbutton.visible = false;
             mainGameState.expandSymbols();
@@ -341,6 +393,8 @@ mainGameState.OnSymbolDown = function (touchedbutton) {
 
 mainGameState.OnSymbolUp = function (touchedbutton) {
     touchedbutton.visible = true;
+
+    //RETURNS THE SYMBOLS TO THEIR ORIGINAL POSITION FOR FEEDBACK
     if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel') {
         game.add.tween(touchedbutton).to({
             x: touchedbutton.x + 5
@@ -353,6 +407,8 @@ mainGameState.OnSymbolUp = function (touchedbutton) {
 
 mainGameState.expandSymbols = function () {
     if (flip1) {
+
+        //ANIMATES THE EXPANSION AND COMPRESSION OF THE SYMBOL MENU ON CLICK "OPEN"
         game.add.tween(mainGameState.symbols).to({
             x: 0
         }, 1200, Phaser.Easing.Bounce.Out, true);
@@ -368,8 +424,9 @@ mainGameState.expandSymbols = function () {
 
 mainGameState.Clear = function (touchedbutton) {
     if (flip6) {
+
+        //CLEARS OUT THE SYMBOLS SHOWN IN THE SYMBOL MENU AND RESETS PHRASE
         for (i = mainGameState.symbols.children.length - 1; i > mainGameState.symbollength; i--) {
-            console.log("for loop working");
             mainGameState.symbols.children[i].destroy();
         }
         mainGameState.word = 0;
@@ -381,6 +438,7 @@ mainGameState.Clear = function (touchedbutton) {
 
 mainGameState.expandDictionary = function () {
     if (flip4) {
+        //ANIMATES EXPANSION AND COMPRESSION OF DICTIONARY MENU
         game.add.tween(mainGameState.dictionary).to({
             y: 100
         }, 1000, Phaser.Easing.Bounce.Out, true);
@@ -396,22 +454,27 @@ mainGameState.expandDictionary = function () {
 
 mainGameState.OnPlayerDown = function () {
     if (flip3) {
+        //REMOVES THE PREVIOUS MESSAGE BEING SAID BY PLAYER SPRITE
         if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) != 0) {
             for (var i = mainGameState.symbols.children.length - 1; i > mainGameState.symbollength; i--) {
                 mainGameState.symbols.children[i].destroy();
             }
         }
+
+        //ENDS YOUR SPEECH BY CLICKING ON YOURSELF 
         if (mainGameState.playerList[mainGameState.idtoDestroy]) {
             if (mainGameState.idtoDestroy == myPlayerID) {
 
                 if (mainGameState.playerList[mainGameState.idtoDestroy].children[0].visible) {
                     Client.requestEndSpeech();
-                    console.log("request sent by game");
                 }
             }
         }
-        console.log(mainGameState.phrase);
+
+        //SENDS CLIENT THE PHRASE ON CLICKING SELF
         Client.sendPhrase(mainGameState.phrase);
+
+        //RESETS PHRASE 
         mainGameState.word = 0;
         mainGameState.phrase = [];
         flip3 = false;
@@ -427,13 +490,18 @@ mainGameState.sayPhrase = function (id, phrase) {
 
     mainGameState.idtoDestroy = id;
 
+
+    //DETERMINES SIZE OF PHRASE
     var size = Object.keys(phrase).length;
     if (size) {
+
+        //PLAY GRUNT SOUND IF THERE IS A PHRASE TO BE DISPLAYED
         mainGameState.playerList[id].children[0].visible = true;
         mainGameState.gruntSound.play();
         mainGameState.gruntSound._sound.playbackRate.value = mainGameState.randomNumFromInterval(.8, 2.5);
-        console.log(mainGameState.gruntSound._sound.playbackRate.value);
     }
+
+    //CREATES THE SYMBOL COMBO FROM THE PHRASE AS A PARENT OF THE PLAYERS SPEECH BUBBLE
     for (var i = 0; i <= size - 1; i++) {
         if (mainGameState.playerList[id].children[0].children.length < 5) {
             if (id == 1) {
@@ -450,8 +518,8 @@ mainGameState.sayPhrase = function (id, phrase) {
 }
 
 mainGameState.endSpeech = function () {
-    console.log("request received by game");
 
+    //DESTROY THE CURRENT SPEECH 
     if (mainGameState.playerList[mainGameState.idtoDestroy]) {
 
         var symbols = mainGameState.playerList[mainGameState.idtoDestroy].children[0];
@@ -463,10 +531,9 @@ mainGameState.endSpeech = function () {
 
 }
 
-//This function is intended to be able to move our circle.
+//THIS FUNCTION MOVES THE PLAYERS
 mainGameState.movePlayer = function () {
 
-    // If the id is not received by the client, then do nothing
     if (myPlayerID >= 0) {
         var player = this.playerList[myPlayerID];
         var moved = false;
@@ -572,8 +639,6 @@ mainGameState.setID = function (id) {
 mainGameState.randomNumFromInterval = function (min, max) {
     return (Math.random() * (max - min) + min);
 }
-
-//When receiving data of dot ot be received the group will be looped through finding the matching dot. then that dot will be destroyed
 
 mainGameState.removePlayer = function (id) {
     this.playerList[id].destroy();
