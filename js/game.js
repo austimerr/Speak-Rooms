@@ -30,7 +30,8 @@ var game = new Phaser.Game(
 var mainGameState = {};
 
 mainGameState.preload = function () {
-    game.load.image('player', 'assets/redguy.png');
+    game.load.image('player1', 'assets/redplayer.png');
+    game.load.image('player2', 'assets/blueplayer.png');
     game.load.image('line', 'assets/line.png');
     game.load.image('bubble1', 'assets/bubble1.png');
     game.load.image('bubble2', 'assets/speechbubble.png');
@@ -40,6 +41,11 @@ mainGameState.preload = function () {
     game.load.image('symbol2', 'assets/symbol2.png');
     game.load.image('symbol3', 'assets/symbol3.png');
     game.load.image('symbol4', 'assets/symbol4.png');
+    game.load.image('symbol5', 'assets/symbol5.png');
+    game.load.image('symbol6', 'assets/symbol6.png');
+    game.load.image('symbol7', 'assets/symbol7.png');
+    game.load.image('symbol8', 'assets/symbol8.png');
+
     game.load.image('menu', 'assets/menu.png');
     game.load.image('open', 'assets/opentab.png');
     game.load.image('clear', 'assets/clear.png');
@@ -59,6 +65,8 @@ mainGameState.create = function () {
     game.stage.disableVisibilityChange = true;
     this.playerList = {};
     mainGameState.phrasetoCompare = [];
+
+    game.world.setBounds(0, 0, 1920, 1920);
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -88,9 +96,6 @@ mainGameState.create = function () {
         spacebar: game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
     };
 
-    mainGameState.line = game.add.sprite(400, 400, 'line');
-    mainGameState.line.anchor.setTo(0.5, 0.5);
-
     //UI FUNCTION
 
     mainGameState.populateSymbols();
@@ -99,14 +104,14 @@ mainGameState.create = function () {
 
     //TEXT TO BE SEEN WHEN A PLAYER IS UNABLE TO PLAY
 
-    text = game.add.text(game.world.centerX, 250, ' Sorry, this room is full.');
-    text.anchor.set(0.5);
-    text.align = 'center';
+    mainGameState.text = game.add.text(game.world.centerX, 250, ' Sorry, this room is full.');
+    mainGameState.text.anchor.set(0.5);
+    mainGameState.text.align = 'center';
 
-    text.font = 'Arial Black';
-    text.fontSize = 50;
-    text.fontWeight = 'bold';
-    text.fill = '#000000';
+    mainGameState.text.font = 'Arial Black';
+    mainGameState.text.fontSize = 50;
+    mainGameState.text.fontWeight = 'bold';
+    mainGameState.text.fill = '#000000';
 };
 
 mainGameState.populateSymbols = function () {
@@ -118,6 +123,7 @@ mainGameState.populateSymbols = function () {
     mainGameState.word = 0;
 
     mainGameState.symbols = game.add.sprite(-155, 0, 'menu');
+    mainGameState.symbols.fixedToCamera = true;
     mainGameState.symbols.alpha = 0.8;
 
 
@@ -125,35 +131,24 @@ mainGameState.populateSymbols = function () {
     mainGameState.open.inputEnabled = true;
     mainGameState.open.smoothed = false;
 
-    mainGameState.clear = mainGameState.symbols.addChild(game.make.sprite(20, 250, 'clear'));
+    mainGameState.clear = mainGameState.symbols.addChild(game.make.sprite(20, 360, 'clear'));
     mainGameState.clear.inputEnabled = true;
     mainGameState.clear.smoothed = false;
 
-    mainGameState.symbol1 = mainGameState.symbols.addChild(game.make.sprite(0, 30, 'symbol1'));
-    mainGameState.symbol1.inputEnabled = true;
-    mainGameState.symbol1.smoothed = false;
-    game.physics.arcade.enable(mainGameState.symbol1);
-    mainGameState.symbol1.body.setCircle(32);
+    var symbolarray = ['symbol1', 'symbol2', 'symbol3', 'symbol4', 'symbol5', 'symbol6', 'symbol7', 'symbol8']
 
-    mainGameState.symbol2 = mainGameState.symbols.addChild(game.make.sprite(70, 30, 'symbol2'));
-    mainGameState.symbol2.inputEnabled = true;
-    mainGameState.symbol2.smoothed = false;
-    game.physics.arcade.enable(mainGameState.symbol2);
-    mainGameState.symbol2.body.setCircle(32);
-
-    mainGameState.symbol3 = mainGameState.symbols.addChild(game.make.sprite(0, 100, 'symbol3'));
-    mainGameState.symbol3.inputEnabled = true;
-    mainGameState.symbol3.smoothed = false;
-    game.physics.arcade.enable(mainGameState.symbol3);
-    mainGameState.symbol3.body.setCircle(32);
-
-    mainGameState.symbol4 = mainGameState.symbols.addChild(game.make.sprite(70, 100, 'symbol4'));
-    mainGameState.symbol4.inputEnabled = true;
-    mainGameState.symbol4.smoothed = false;
-    game.physics.arcade.enable(mainGameState.symbol4);
-    mainGameState.symbol4.body.setCircle(32);
-
-    //THIS SYMBOL LENGTH IS USED TO REVERT BACK TO DEFAULT CHILD LENGTH LATER
+    for (var i = 0; i <= symbolarray.length - 1; i++) {
+        if (i % 2 == 0) {
+            var currentsymbol = mainGameState.symbols.addChild(game.make.sprite(0, ((i * 35) + 30), symbolarray[i]));
+        } else if (Math.abs(i % 2) == 1) {
+            var currentsymbol = mainGameState.symbols.addChild(game.make.sprite(70, ((i * 35) - 5), symbolarray[i]));
+        }
+        currentsymbol.inputEnabled = true;
+        currentsymbol.smoothed = false;
+        game.physics.arcade.enable(currentsymbol);
+        currentsymbol.body.setCircle(32);
+    }
+    //    //THIS SYMBOL LENGTH IS USED TO REVERT BACK TO DEFAULT CHILD LENGTH LATER
 
     mainGameState.symbollength = mainGameState.symbols.children.length - 1;
 
@@ -164,6 +159,7 @@ mainGameState.populateDictionary = function () {
     //POPULATES THE DICTIONARY MENU AT THE BOTTOM OF THE SCREEN 
 
     mainGameState.dictionary = game.add.sprite(0, 690, 'dictionary');
+    mainGameState.dictionary.fixedToCamera = true;
     mainGameState.dictionary.alpha = 0.85;
 
     mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(480, 75, 'dictionarylabel'));
@@ -177,118 +173,52 @@ mainGameState.populateDictionary = function () {
     }));
     mainGameState.dictionarytext.anchor.setTo(0.5, 0.5);
 
-    //EACH DEFINTION-SYMBOL COMBO REQUIRES THIS BLOCK OF CODE RIGHT NOW. MAYBE SWITCH TO A MORE GENERAL FORMAT?
     //WHEN YOU WANT TO SEARCH THROUGH THE ACTUAL DEFINED WORDS START WITH I = 2 (INDEX OF GREEN IN CHILDREN)
 
-    mainGameState.definition1 = mainGameState.dictionary.addChild(game.add.text(100, 300, 'Green: ', {
-        font: '28px Georgia',
-        fill: '#000000',
-        align: 'left'
-    }));
-    mainGameState.definition1.anchor.setTo(0.5, 0.5);
-    //PLAYERS CAN CLICK ON SYMBOL SPACE TO FILL IT WITH SYMBOLS
+    //Array featuring all words
+    var dictionaryarray = ['Green: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: '];
 
-    var symbolspace = mainGameState.definition1.addChild(game.make.sprite(120, -10, 'symbolspace'));
-    symbolspace.anchor.setTo(0.5, 0.5);
-    symbolspace.inputEnabled = true;
-    //PLAYERS CAN CLICK ON CHECKBOX TO SEND SYMBOL COMBO TO SERVER TO COMPARE WITH TEAMMATE
+    for (var i = 0; i <= dictionaryarray.length - 1; i++) {
+        if (i % 2 == 0) {
+            var dictionaryentry = mainGameState.dictionary.addChild(game.add.text(100, ((i * 50) + 300), dictionaryarray[i], {
+                font: '28px Georgia',
+                fill: '#000000',
+                align: 'left'
+            }));
+        } else if (Math.abs(i % 2) == 1) {
+            var dictionaryentry = mainGameState.dictionary.addChild(game.add.text(450, ((i * 50) + 250), dictionaryarray[i], {
+                font: '28px Georgia',
+                fill: '#000000',
+                align: 'left'
+            }));
+        }
+        dictionaryentry.anchor.setTo(0.5, 0.5);
+        var symbolspace = dictionaryentry.addChild(game.make.sprite(120, -10, 'symbolspace'));
+        symbolspace.anchor.setTo(0.5, 0.5);
+        symbolspace.inputEnabled = true;
+        //PLAYERS CAN CLICK ON CHECKBOX TO SEND SYMBOL COMBO TO SERVER TO COMPARE WITH TEAMMATE
+        var checkbox = dictionaryentry.addChild(game.make.sprite(250, -10, 'checkbox'));
+        checkbox.anchor.setTo(0.5, 0.5);
+        checkbox.inputEnabled = true;
+        //CHECK WILL APPEAR WHEN CHECKBOX IS CLICKED
+        var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
+        check.anchor.setTo(0.5, 0.5);
+        check.visible = false;
 
-    var checkbox = mainGameState.definition1.addChild(game.make.sprite(250, -10, 'checkbox'));
-    checkbox.anchor.setTo(0.5, 0.5);
-    checkbox.inputEnabled = true;
-    //CHECK WILL APPEAR WHEN CHECKBOX IS CLICKED
-    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
-    check.anchor.setTo(0.5, 0.5);
-    check.visible = false;
-
-    //DEFINITION 2 BLOCK
-    mainGameState.definition2 = mainGameState.dictionary.addChild(game.add.text(450, 300, 'Red: ', {
-        font: '28px Georgia',
-        fill: '#000000',
-        align: 'left'
-    }));
-    mainGameState.definition2.anchor.setTo(0.5, 0.5);
-    symbolspace = mainGameState.definition2.addChild(game.make.sprite(110, -10, 'symbolspace'));
-    symbolspace.anchor.setTo(0.5, 0.5);
-    symbolspace.inputEnabled = true;
-    checkbox = mainGameState.definition2.addChild(game.make.sprite(250, -10, 'checkbox'));
-    checkbox.anchor.setTo(0.5, 0.5);
-    checkbox.inputEnabled = true;
-    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
-    check.anchor.setTo(0.5, 0.5);
-    check.visible = false;
-
-    mainGameState.definition3 = mainGameState.dictionary.addChild(game.add.text(100, 400, 'Circle: ', {
-        font: '28px Georgia',
-        fill: '#000000',
-        align: 'left'
-    }));
-    mainGameState.definition3.anchor.setTo(0.5, 0.5);
-    symbolspace = mainGameState.definition3.addChild(game.make.sprite(110, -10, 'symbolspace'));
-    symbolspace.anchor.setTo(0.5, 0.5);
-    symbolspace.inputEnabled = true;
-    checkbox = mainGameState.definition3.addChild(game.make.sprite(250, -10, 'checkbox'));
-    checkbox.anchor.setTo(0.5, 0.5);
-    checkbox.inputEnabled = true;
-    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
-    check.anchor.setTo(0.5, 0.5);
-    check.visible = false;
-
-    mainGameState.definition4 = mainGameState.dictionary.addChild(game.add.text(450, 400, 'Square: ', {
-        font: '28px Georgia',
-        fill: '#000000',
-        align: 'left'
-    }));
-    mainGameState.definition4.anchor.setTo(0.5, 0.5);
-    symbolspace = mainGameState.definition4.addChild(game.make.sprite(110, -10, 'symbolspace'));
-    symbolspace.anchor.setTo(0.5, 0.5);
-    symbolspace.inputEnabled = true;
-    checkbox = mainGameState.definition4.addChild(game.make.sprite(250, -10, 'checkbox'));
-    checkbox.anchor.setTo(0.5, 0.5);
-    checkbox.inputEnabled = true;
-    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
-    check.anchor.setTo(0.5, 0.5);
-    check.visible = false;
-
-
-    mainGameState.definition5 = mainGameState.dictionary.addChild(game.add.text(100, 500, 'Player\nAbove: ', {
-        font: '28px Georgia',
-        fill: '#000000',
-        align: 'left'
-    }));
-    mainGameState.definition5.anchor.setTo(0.5, 0.5);
-    symbolspace = mainGameState.definition5.addChild(game.make.sprite(110, -10, 'symbolspace'));
-    symbolspace.anchor.setTo(0.5, 0.5);
-    symbolspace.inputEnabled = true;
-    checkbox = mainGameState.definition5.addChild(game.make.sprite(250, -10, 'checkbox'));
-    checkbox.anchor.setTo(0.5, 0.5);
-    checkbox.inputEnabled = true;
-    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
-    check.anchor.setTo(0.5, 0.5);
-    check.visible = false;
-
-    mainGameState.definition6 = mainGameState.dictionary.addChild(game.add.text(450, 500, 'Player\nBelow: ', {
-        font: '28px Georgia',
-        fill: '#000000',
-        align: 'left'
-    }));
-    mainGameState.definition6.anchor.setTo(0.5, 0.5);
-    symbolspace = mainGameState.definition6.addChild(game.make.sprite(110, -10, 'symbolspace'));
-    symbolspace.anchor.setTo(0.5, 0.5);
-    symbolspace.inputEnabled = true;
-    checkbox = mainGameState.definition6.addChild(game.make.sprite(250, -10, 'checkbox'));
-    checkbox.anchor.setTo(0.5, 0.5);
-    checkbox.inputEnabled = true;
-    var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
-    check.anchor.setTo(0.5, 0.5);
-    check.visible = false;
+    }
 }
 
 
 mainGameState.addNewPlayer = function (id, x, y) {
-    text.visible = false;
+    if (mainGameState.text) {
+        mainGameState.text.visible = false;
+    }
     // --- Player Initialization ---
-    mainGameState.playerList[id] = game.add.sprite(x, y, 'player');
+    if (id == 1) {
+        mainGameState.playerList[id] = game.add.sprite(x, y, 'player1');
+    } else if (id == 2) {
+        mainGameState.playerList[id] = game.add.sprite(x, y, 'player2');
+    }
     mainGameState.playerList[id].anchor.setTo(.5, .5);
     mainGameState.playerList[id].scale.setTo(2, 2);
     mainGameState.playerList[id].smoothed = false;
@@ -303,23 +233,17 @@ mainGameState.addNewPlayer = function (id, x, y) {
         game.world.swap(mainGameState.playerList[id], mainGameState.dictionary);
     }
 
-    if (id == 1) {
-        //SETS UP THE SPEECH BUBBLES FOR PLAYER 1
-        mainGameState.playerList[id].addChild(game.make.sprite(0, 45, 'bubble1'));
-        mainGameState.playerList[id].children[0].visible = false;
-        mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
-    }
+    //SETS UP THE SPEECH BUBBLES FOR PLAYER 2
+    mainGameState.playerList[id].addChild(game.make.sprite(0, -45, 'bubble2'));
+    mainGameState.playerList[id].children[0].visible = false;
+    mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
 
-    if (id == 2) {
-        //SETS UP THE SPEECH BUBBLES FOR PLAYER 2
-        mainGameState.playerList[id].addChild(game.make.sprite(0, -35, 'bubble2'));
-        mainGameState.playerList[id].children[0].visible = false;
-        mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
-    }
+    game.camera.follow(mainGameState.playerList[myPlayerID]);
 };
 
 mainGameState.update = function () {
     this.movePlayer();
+    game.camera.follow(mainGameState.playerList[myPlayerID]);
 
     //DIRECT MOUSE IMPUT TO VARIOUS FUNCTIONS. SHORTEN LATER THROUGH LOOPS
 
@@ -446,7 +370,7 @@ mainGameState.OnSymbolDown = function (touchedbutton) {
 
             //SHOWS THE SYMBOLS YOU ARE TYPING IN THE SYMBOL MENU AS YOU TYPE
             if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) < 5) {
-                var typedsprite = mainGameState.symbols.addChild(game.make.sprite(0, 200, touchedbutton.key));
+                var typedsprite = mainGameState.symbols.addChild(game.make.sprite(0, 310, touchedbutton.key));
                 typedsprite.x = ((((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) * 28) - 28);
                 typedsprite.scale.setTo(.5, .5);
             }
@@ -487,13 +411,13 @@ mainGameState.expandSymbols = function () {
     if (flip1) {
 
         //ANIMATES THE EXPANSION AND COMPRESSION OF THE SYMBOL MENU ON CLICK "OPEN"
-        game.add.tween(mainGameState.symbols).to({
+        game.add.tween(mainGameState.symbols.cameraOffset).to({
             x: 0
         }, 1200, Phaser.Easing.Bounce.Out, true);
         flip1 = false;
     } else if (!flip1) {
 
-        game.add.tween(mainGameState.symbols).to({
+        game.add.tween(mainGameState.symbols.cameraOffset).to({
             x: -155
         }, 100, Phaser.Easing.Elastic.Out, true);
         flip1 = true;
@@ -517,13 +441,13 @@ mainGameState.Clear = function (touchedbutton) {
 mainGameState.expandDictionary = function () {
     if (flip4) {
         //ANIMATES EXPANSION AND COMPRESSION OF DICTIONARY MENU
-        game.add.tween(mainGameState.dictionary).to({
-            y: 100
+        game.add.tween(mainGameState.dictionary.cameraOffset).to({
+            y: 150
         }, 1000, Phaser.Easing.Bounce.Out, true);
         flip4 = false;
     } else if (!flip4) {
 
-        game.add.tween(mainGameState.dictionary).to({
+        game.add.tween(mainGameState.dictionary.cameraOffset).to({
             y: 690
         }, 400, Phaser.Easing.Elastic.Out, true);
         flip4 = true;
@@ -582,11 +506,8 @@ mainGameState.sayPhrase = function (id, phrase) {
     //CREATES THE SYMBOL COMBO FROM THE PHRASE AS A PARENT OF THE PLAYERS SPEECH BUBBLE
     for (var i = 0; i <= size - 1; i++) {
         if (mainGameState.playerList[id].children[0].children.length < 5) {
-            if (id == 1) {
-                var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite((i * 17) - 44, -8, phrase[i]));
-            } else if (id == 2) {
-                var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite((i * 17) - 44, -18, phrase[i]));
-            }
+
+            var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite((i * 17) - 44, -18, phrase[i]));
             symbolSprite.scale.setTo(.35, .35);
         }
     }
@@ -616,16 +537,6 @@ mainGameState.movePlayer = function () {
         var player = this.playerList[myPlayerID];
         var moved = false;
         var speed = 7;
-
-        if (myPlayerID == 1) {
-            if (this.playerList[myPlayerID].y > 350) {
-                this.playerList[myPlayerID].y = 350;
-            }
-        } else if (myPlayerID == 2) {
-            if (this.playerList[myPlayerID].y < 450) {
-                this.playerList[myPlayerID].y = 450;
-            }
-        }
 
         //RIGHT first movement
 

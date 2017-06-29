@@ -22,6 +22,8 @@ app.get('/', function (req, res) {
 });
 
 httpServer.lastPlayerID = 0;
+httpServer.definitions = {};
+httpServer.definitionIndex = 0;
 
 httpServer.listen(8081, function () {
     console.log('Listening on ' + httpServer.address().port);
@@ -87,16 +89,19 @@ io.on('connection', function (socket) {
                     var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
                     if (size1 >= 0 && size2 >= 0) {
+                        console.log("word length acceptable");
                         if (size1 == size2) {
+                            console.log("sizes equal");
                             for (var i = 0; i <= size1; i++) {
                                 if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
                                     console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
                                     return;
                                 }
                                 if (i == size1) {
-                                    console.log("matching phrases");
-                                    io.emit("match", httpServer.p1data);
+                                    console.log("content the same");
+                                    compareSimilarity();
                                 }
+
                             }
 
                         } else {
@@ -118,15 +123,17 @@ io.on('connection', function (socket) {
                     var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
                     if (size1 >= 0 && size2 >= 0) {
+                        console.log("word length acceptable");
                         if (size1 == size2) {
+                            console.log("sizes equal");
                             for (var i = 0; i <= size1; i++) {
                                 if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
                                     console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
                                     return;
                                 }
                                 if (i == size1) {
-                                    console.log("matching phrases");
-                                    io.emit("match", httpServer.p1data);
+                                    console.log("content the same");
+                                    compareSimilarity();
                                 }
                             }
 
@@ -152,6 +159,53 @@ io.on('connection', function (socket) {
         });
     });
 });
+
+function compareSimilarity() {
+    if (!isEmpty(httpServer.definitions)) {
+        console.log("contains definitions");
+        var defsize = Object.keys(httpServer.definitions).length - 1;
+        console.log(defsize);
+        for (var i = 0; i <= defsize; i++) {
+            console.log("definition" + httpServer.definitions[i].phrase);
+            console.log("phrase " + httpServer.p1data.phrase);
+            console.log("for loop to check repeat working..");
+            if (httpServer.definitions[i].phrase.toString() == httpServer.p1data.phrase.toString()) {
+                console.log("This phrase is already taken");
+                return;
+            }
+            if (i == defsize) {
+                console.log("matching phrases");
+                httpServer.definitions[httpServer.definitionIndex] = {
+                    word: httpServer.p2data.word,
+                    phrase: httpServer.p2data.phrase
+                };
+                httpServer.definitionIndex++;
+                console.log(httpServer.definitions);
+                io.emit("match", httpServer.p1data);
+            }
+        }
+    } else {
+        console.log("contains no definitions");
+        console.log("matching phrases");
+        httpServer.definitions[httpServer.definitionIndex] = {
+            word: httpServer.p2data.word,
+            phrase: httpServer.p2data.phrase
+        };
+        httpServer.definitions[httpServer.definitionIndex];
+        httpServer.definitionIndex++;
+        console.log(httpServer.definitions);
+        io.emit("match", httpServer.p1data);
+    }
+
+}
+
+function isEmpty(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
 
 
 function getAllPlayers() {
