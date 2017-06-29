@@ -148,6 +148,10 @@ io.on('connection', function (socket) {
 
         });
 
+        socket.on('dictionaryopen', function () {
+            io.emit('dictionaryopen', socket.player.id);
+        });
+
         socket.on('endspeech', function () {
             io.emit('endspeech');
         });

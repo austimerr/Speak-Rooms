@@ -27,7 +27,12 @@ Client.sendForCompare = function (data) {
     }
 };
 
+Client.dictionaryInUse = function () {
+    Client.socket.emit('dictionaryopen');
+};
+
 Client.requestEndSpeech = function () {
+    console.log("client receives end speech request");
     Client.socket.emit('endspeech');
 };
 
@@ -61,6 +66,10 @@ Client.socket.on('phrase', function (data) {
 
 Client.socket.on('match', function (data) {
     mainGameState.match(data.word, data.phrase);
+});
+
+Client.socket.on('dictionaryopen', function (data) {
+    mainGameState.dictionaryInUse(data);
 });
 
 

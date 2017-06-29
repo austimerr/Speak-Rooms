@@ -14,6 +14,10 @@ var flip3 = true;
 var flip4 = true;
 var flip5 = true;
 var flip6 = true;
+var flip7 = false;
+var flip8 = true;
+
+var dictionaryOpen = false;
 
 
 
@@ -55,6 +59,7 @@ mainGameState.preload = function () {
     game.load.image('symbolspace', 'assets/symbolspace.png');
     game.load.image('checkbox', 'assets/checkbox.png');
     game.load.image('check', 'assets/check.png');
+    game.load.image('dictionaryopen', 'assets/dictionaryemblem.png');
 
     game.load.audio('grunt', 'assets/grunt.wav');
     game.load.audio('click', 'assets/click.wav');
@@ -274,6 +279,34 @@ mainGameState.update = function () {
             mainGameState.dictionary.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
         }
     }
+
+    if (dictionaryOpen && flip8) {
+        Client.dictionaryInUse();
+        flip8 = false;
+        //this needs to take into account only the dictionary that was opened
+    } else if (!dictionaryOpen && flip7) {
+        mainGameState.dictionaryClosed();
+    }
+}
+
+mainGameState.dictionaryInUse = function (id) {
+    console.log("dictionary opened");
+    mainGameState.idtoDestroy = id;
+    mainGameState.playerList[id].children[0].visible = true;
+    var emblem = mainGameState.playerList[id].children[0].addChild(game.make.sprite(0, -25, 'dictionaryopen'));
+    emblem.anchor.setTo(0.5, 0.5);
+    emblem.smoothed = false;
+    emblem.scale.setTo(0.4, 0.4);
+    flip7 = true;
+}
+
+mainGameState.dictionaryClosed = function () {
+    if (myPlayerID == mainGameState.idtoDestroy) {
+        console.log("dictionary closed");
+        flip8 = true;
+        Client.requestEndSpeech();
+        flip7 = false;
+    }
 }
 
 mainGameState.OnDefineDown = function (touchedbutton) {
@@ -444,18 +477,21 @@ mainGameState.expandDictionary = function () {
         game.add.tween(mainGameState.dictionary.cameraOffset).to({
             y: 150
         }, 1000, Phaser.Easing.Bounce.Out, true);
+        dictionaryOpen = true;
         flip4 = false;
     } else if (!flip4) {
 
         game.add.tween(mainGameState.dictionary.cameraOffset).to({
             y: 690
         }, 400, Phaser.Easing.Elastic.Out, true);
+        dictionaryOpen = false;
+        //this is affecting other player
         flip4 = true;
     }
 }
 
 mainGameState.OnPlayerDown = function () {
-    if (flip3) {
+    if (flip3 && !dictionaryOpen) {
         //REMOVES THE PREVIOUS MESSAGE BEING SAID BY PLAYER SPRITE
         if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) != 0) {
             for (var i = mainGameState.symbols.children.length - 1; i > mainGameState.symbollength; i--) {
@@ -466,9 +502,11 @@ mainGameState.OnPlayerDown = function () {
         //ENDS YOUR SPEECH BY CLICKING ON YOURSELF 
         if (mainGameState.playerList[mainGameState.idtoDestroy]) {
             if (mainGameState.idtoDestroy == myPlayerID) {
+                if (!dictionaryOpen) {
 
-                if (mainGameState.playerList[mainGameState.idtoDestroy].children[0].visible) {
-                    Client.requestEndSpeech();
+                    if (mainGameState.playerList[mainGameState.idtoDestroy].children[0].visible) {
+                        Client.requestEndSpeech();
+                    }
                 }
             }
         }
@@ -511,8 +549,6 @@ mainGameState.sayPhrase = function (id, phrase) {
             symbolSprite.scale.setTo(.35, .35);
         }
     }
-
-    mainGameState.timeCheck = game.time.now;
     mainGameState.destroytext = true;
 }
 
@@ -533,7 +569,7 @@ mainGameState.endSpeech = function () {
 //THIS FUNCTION MOVES THE PLAYERS
 mainGameState.movePlayer = function () {
 
-    if (myPlayerID >= 0) {
+    if (myPlayerID >= 0 && !dictionaryOpen) {
         var player = this.playerList[myPlayerID];
         var moved = false;
         var speed = 7;
