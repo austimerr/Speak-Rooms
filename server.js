@@ -78,6 +78,7 @@ io.on('connection', function (socket) {
         });
 
         socket.on('1compare', function (data) {
+            console.log("server receives for compare");
             httpServer.p1data = data;
             if (httpServer.p2data) {
                 if (httpServer.p1data.word == httpServer.p2data.word) {
@@ -90,22 +91,26 @@ io.on('connection', function (socket) {
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
                     if (size1 >= 0 && size2 >= 0) {
                         console.log("word length acceptable");
-                        if (size1 == size2) {
-                            console.log("sizes equal");
-                            for (var i = 0; i <= size1; i++) {
-                                if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                    console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
-                                    return;
-                                }
-                                if (i == size1) {
-                                    console.log("content the same");
-                                    compareSimilarity();
+                        if (httpServer.p1data.page == httpServer.p2data.page) {
+                            if (size1 == size2) {
+                                console.log("sizes equal");
+                                for (var i = 0; i <= size1; i++) {
+                                    if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
+                                        console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
+                                        return;
+                                    }
+                                    if (i == size1) {
+                                        console.log("content the same");
+                                        compareSimilarity();
+                                    }
+
                                 }
 
+                            } else {
+                                console.log("no match, sizes not equal");
                             }
-
                         } else {
-                            console.log("no match, sizes not equal");
+                            console.log("not on same page");
                         }
                     } else {
                         console.log("no match, sizes not greater than or equal to 0");
@@ -124,21 +129,25 @@ io.on('connection', function (socket) {
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
                     if (size1 >= 0 && size2 >= 0) {
                         console.log("word length acceptable");
-                        if (size1 == size2) {
-                            console.log("sizes equal");
-                            for (var i = 0; i <= size1; i++) {
-                                if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                    console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
-                                    return;
+                        if (httpServer.p1data.page == httpServer.p2data.page) {
+                            if (size1 == size2) {
+                                console.log("sizes equal");
+                                for (var i = 0; i <= size1; i++) {
+                                    if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
+                                        console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
+                                        return;
+                                    }
+                                    if (i == size1) {
+                                        console.log("content the same");
+                                        compareSimilarity();
+                                    }
                                 }
-                                if (i == size1) {
-                                    console.log("content the same");
-                                    compareSimilarity();
-                                }
-                            }
 
+                            } else {
+                                console.log("no match, sizes not equal");
+                            }
                         } else {
-                            console.log("no match, sizes not equal");
+                            console.log("not on same page");
                         }
                     } else {
                         console.log("no match, sizes not greater than or equal to 0");
@@ -150,6 +159,10 @@ io.on('connection', function (socket) {
 
         socket.on('dictionaryopen', function () {
             io.emit('dictionaryopen', socket.player.id);
+        });
+
+        socket.on('dictionaryclose', function () {
+            io.emit('dictionaryclose', socket.player.id);
         });
 
         socket.on('endspeech', function () {
@@ -181,7 +194,8 @@ function compareSimilarity() {
                 console.log("matching phrases");
                 httpServer.definitions[httpServer.definitionIndex] = {
                     word: httpServer.p2data.word,
-                    phrase: httpServer.p2data.phrase
+                    phrase: httpServer.p2data.phrase,
+                    page: httpServer.p2data.phrase
                 };
                 httpServer.definitionIndex++;
                 console.log(httpServer.definitions);
@@ -193,7 +207,8 @@ function compareSimilarity() {
         console.log("matching phrases");
         httpServer.definitions[httpServer.definitionIndex] = {
             word: httpServer.p2data.word,
-            phrase: httpServer.p2data.phrase
+            phrase: httpServer.p2data.phrase,
+            page: httpServer.p2data.page
         };
         httpServer.definitions[httpServer.definitionIndex];
         httpServer.definitionIndex++;

@@ -56,6 +56,14 @@ mainGameState.preload = function () {
 
     game.load.image('dictionary', 'assets/dictionarymenu.png');
     game.load.image('dictionarylabel', 'assets/dictionarylabel.png');
+    game.load.image('one', 'assets/1.png');
+    game.load.image('two', 'assets/2.png');
+    game.load.image('three', 'assets/3.png');
+    game.load.image('four', 'assets/4.png');
+    game.load.image('page1', 'assets/page1.png');
+    game.load.image('page2', 'assets/page2.png');
+    game.load.image('page3', 'assets/page3.png');
+    game.load.image('page4', 'assets/page4.png');
     game.load.image('symbolspace', 'assets/symbolspace.png');
     game.load.image('checkbox', 'assets/checkbox.png');
     game.load.image('check', 'assets/check.png');
@@ -109,9 +117,9 @@ mainGameState.create = function () {
 
     //TEXT TO BE SEEN WHEN A PLAYER IS UNABLE TO PLAY
 
-    mainGameState.text = game.add.text(game.world.centerX, 250, ' Sorry, this room is full.');
+    mainGameState.text = game.add.text(game.world.centerX, 0, ' Sorry, this room is full.');
     mainGameState.text.anchor.set(0.5);
-    mainGameState.text.align = 'center';
+    mainGameState.text.align = 'left';
 
     mainGameState.text.font = 'Arial Black';
     mainGameState.text.fontSize = 50;
@@ -167,9 +175,32 @@ mainGameState.populateDictionary = function () {
     mainGameState.dictionary.fixedToCamera = true;
     mainGameState.dictionary.alpha = 0.85;
 
-    mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(480, 75, 'dictionarylabel'));
+    mainGameState.Page1 = mainGameState.dictionary.addChild(game.make.sprite(0, 0, 'page1'));
+    mainGameState.Page1.visible = true;
+    mainGameState.Page1.alpha = .85;
+    mainGameState.activePage = mainGameState.Page1;
+    mainGameState.Page2 = mainGameState.dictionary.addChild(game.make.sprite(0, 0, 'page2'));
+    mainGameState.Page2.visible = false;
+    mainGameState.Page2.alpha = .85;
+    mainGameState.Page3 = mainGameState.dictionary.addChild(game.make.sprite(0, 0, 'page3'));
+    mainGameState.Page3.visible = false;
+    mainGameState.Page3.alpha = .85;
+    mainGameState.Page4 = mainGameState.dictionary.addChild(game.make.sprite(0, 0, 'page4'));
+    mainGameState.Page4.visible = false;
+    mainGameState.Page4.alpha = .85;
+
+    mainGameState.dictionarylabel = mainGameState.dictionary.addChild(game.make.sprite(460, 75, 'dictionarylabel'));
     mainGameState.dictionarylabel.inputEnabled = true;
-    mainGameState.dictionarylabel.smoothed = false;
+    mainGameState.dictionarylabel.smoothed = false
+
+    mainGameState.oneButton = mainGameState.dictionary.addChild(game.make.sprite(750, 220, 'one'));
+    mainGameState.oneButton.inputEnabled = true;
+    mainGameState.twoButton = mainGameState.dictionary.addChild(game.make.sprite(750, 320, 'two'));
+    mainGameState.twoButton.inputEnabled = true;
+    mainGameState.threeButton = mainGameState.dictionary.addChild(game.make.sprite(750, 420, 'three'));
+    mainGameState.threeButton.inputEnabled = true;
+    mainGameState.fourButton = mainGameState.dictionary.addChild(game.make.sprite(750, 520, 'four'));
+    mainGameState.fourButton.inputEnabled = true;
 
     mainGameState.dictionarytext = mainGameState.dictionary.addChild(game.add.text(400, 200, 'Reach Agreement, Define Meaning', {
         font: '32px Georgia',
@@ -181,21 +212,80 @@ mainGameState.populateDictionary = function () {
     //WHEN YOU WANT TO SEARCH THROUGH THE ACTUAL DEFINED WORDS START WITH I = 2 (INDEX OF GREEN IN CHILDREN)
 
     //Array featuring all words
-    var dictionaryarray = ['Green: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: '];
+    var dictionaryarray = ['Page1: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
+                           'Page2: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
+                           'Page3: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
+                           'Page4: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: '];
 
     for (var i = 0; i <= dictionaryarray.length - 1; i++) {
-        if (i % 2 == 0) {
-            var dictionaryentry = mainGameState.dictionary.addChild(game.add.text(100, ((i * 50) + 300), dictionaryarray[i], {
-                font: '28px Georgia',
-                fill: '#000000',
-                align: 'left'
-            }));
-        } else if (Math.abs(i % 2) == 1) {
-            var dictionaryentry = mainGameState.dictionary.addChild(game.add.text(450, ((i * 50) + 250), dictionaryarray[i], {
-                font: '28px Georgia',
-                fill: '#000000',
-                align: 'left'
-            }));
+        //Page 1
+        if (i <= 7) {
+            console.log("page 1 populated");
+            if (i % 2 == 0) {
+                console.log("page 1 even entry " + dictionaryentry + i);
+                var dictionaryentry = mainGameState.Page1.addChild(game.add.text(100, ((i * 50) + 300), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            } else if (Math.abs(i % 2) == 1) {
+                console.log("page 1 odd entry " + dictionaryentry + i);
+                var dictionaryentry = mainGameState.Page1.addChild(game.add.text(450, ((i * 50) + 250), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            }
+            //Page 2
+        } else if (i > 7 && i <= 15) {
+            console.log("page 2 populated");
+            if (i % 2 == 0) {
+                console.log("page 2 even entry " + dictionaryentry + i);
+                dictionaryentry = mainGameState.Page2.addChild(game.add.text(100, ((i * 50) - 100), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            } else if (Math.abs(i % 2) == 1) {
+                console.log("page 2 odd entry " + dictionaryentry + i);
+                dictionaryentry = mainGameState.Page2.addChild(game.add.text(450, ((i * 50) - 150), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            }
+            //Page 3
+        } else if (i > 15 && i <= 23) {
+            console.log("page 3 populated");
+            if (i % 2 == 0) {
+                dictionaryentry = mainGameState.Page3.addChild(game.add.text(100, ((i * 50) - 500), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            } else if (Math.abs(i % 2) == 1) {
+                dictionaryentry = mainGameState.Page3.addChild(game.add.text(450, ((i * 50) - 550), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            }
+            //Page 4
+        } else if (i > 23 && i <= 32) {
+            console.log("page 4 populated");
+            if (i % 2 == 0) {
+                dictionaryentry = mainGameState.Page4.addChild(game.add.text(100, ((i * 50) - 900), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            } else if (Math.abs(i % 2) == 1) {
+                dictionaryentry = mainGameState.Page4.addChild(game.add.text(450, ((i * 50) - 950), dictionaryarray[i], {
+                    font: '28px Georgia',
+                    fill: '#000000',
+                    align: 'left'
+                }));
+            }
         }
         dictionaryentry.anchor.setTo(0.5, 0.5);
         var symbolspace = dictionaryentry.addChild(game.make.sprite(120, -10, 'symbolspace'));
@@ -209,6 +299,7 @@ mainGameState.populateDictionary = function () {
         var check = checkbox.addChild(game.make.sprite(15, -10, 'check'));
         check.anchor.setTo(0.5, 0.5);
         check.visible = false;
+
 
     }
 }
@@ -259,8 +350,8 @@ mainGameState.update = function () {
 
     if (mainGameState.dictionary.children) {
 
-        mainGameState.dictionary.children[0].events.onInputDown.add(mainGameState.OnSymbolDown, this);
-        mainGameState.dictionary.children[0].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+        mainGameState.dictionary.children[4].events.onInputDown.add(mainGameState.OnSymbolDown, this);
+        mainGameState.dictionary.children[4].events.onInputUp.add(mainGameState.OnSymbolUp, this);
     }
 
     if (myPlayerID >= 0) {
@@ -270,13 +361,35 @@ mainGameState.update = function () {
 
     };
 
+    mainGameState.oneButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+    mainGameState.twoButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+    mainGameState.threeButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+    mainGameState.fourButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+
     //FOR LOOP FOR THE DEFINED WORDS
-    for (i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
-        if (mainGameState.dictionary.children[i]) {
-            mainGameState.dictionary.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-            mainGameState.dictionary.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineUp, this);
-            mainGameState.dictionary.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-            mainGameState.dictionary.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+    if (mainGameState.Page1.children && mainGameState.Page2.children && mainGameState.Page3.children && mainGameState.Page4.children) {
+        for (i = 0; i <= mainGameState.Page1.children.length - 1; i++) {
+            if (mainGameState.dictionary.children[i]) {
+                mainGameState.Page1.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page1.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                mainGameState.Page1.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page1.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+
+                mainGameState.Page2.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page2.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                mainGameState.Page2.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page2.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+
+                mainGameState.Page3.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page3.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                mainGameState.Page3.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page3.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+
+                mainGameState.Page4.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page4.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                mainGameState.Page4.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                mainGameState.Page4.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+            }
         }
     }
 
@@ -285,28 +398,63 @@ mainGameState.update = function () {
         flip8 = false;
         //this needs to take into account only the dictionary that was opened
     } else if (!dictionaryOpen && flip7) {
-        mainGameState.dictionaryClosed();
+        mainGameState.dictionaryCloseRequest();
     }
 }
 
 mainGameState.dictionaryInUse = function (id) {
     console.log("dictionary opened");
     mainGameState.idtoDestroy = id;
-    mainGameState.playerList[id].children[0].visible = true;
-    var emblem = mainGameState.playerList[id].children[0].addChild(game.make.sprite(0, -25, 'dictionaryopen'));
+    var emblem = mainGameState.playerList[id].addChild(game.make.sprite(-2, 5, 'dictionaryopen'));
+    //var emblem = mainGameState.playerList[id].children[0].addChild(game.make.sprite(-50, 0, 'dictionaryopen'));
     emblem.anchor.setTo(0.5, 0.5);
     emblem.smoothed = false;
     emblem.scale.setTo(0.4, 0.4);
     flip7 = true;
 }
 
-mainGameState.dictionaryClosed = function () {
+mainGameState.dictionaryButtonPressed = function (touchedbutton) {
+    if (touchedbutton == mainGameState.oneButton) {
+        mainGameState.Page1.visible = true;
+        mainGameState.Page2.visible = false;
+        mainGameState.Page3.visible = false;
+        mainGameState.Page4.visible = false;
+        mainGameState.activePage = mainGameState.Page1;
+    } else if (touchedbutton == mainGameState.twoButton) {
+        mainGameState.Page1.visible = false;
+        mainGameState.Page2.visible = true;
+        console.log(mainGameState.Page2.children);
+        console.log(mainGameState.Page2.children[0].visible);
+        mainGameState.Page3.visible = false;
+        mainGameState.Page4.visible = false;
+        mainGameState.activePage = mainGameState.Page2;
+    } else if (touchedbutton == mainGameState.threeButton) {
+        mainGameState.Page1.visible = false;
+        mainGameState.Page2.visible = false;
+        mainGameState.Page3.visible = true;
+        mainGameState.Page4.visible = false;
+        mainGameState.activePage = mainGameState.Page3;
+    } else if (touchedbutton == mainGameState.fourButton) {
+        mainGameState.Page1.visible = false;
+        mainGameState.Page2.visible = false;
+        mainGameState.Page3.visible = false;
+        mainGameState.Page4.visible = true;
+        mainGameState.activePage = mainGameState.Page4;
+    }
+
+}
+
+mainGameState.dictionaryCloseRequest = function () {
     if (myPlayerID == mainGameState.idtoDestroy) {
         console.log("dictionary closed");
         flip8 = true;
-        Client.requestEndSpeech();
+        Client.requestDictionaryClose();
         flip7 = false;
     }
+}
+
+mainGameState.dictionaryClosed = function (id) {
+    mainGameState.playerList[id].children[1].destroy();
 }
 
 mainGameState.OnDefineDown = function (touchedbutton) {
@@ -317,17 +465,19 @@ mainGameState.OnDefineDown = function (touchedbutton) {
 
             //CHECKS MATCHING WORD SYMBOL COMBO IN YOUR DICTIONARY
             //SENDS SAID MATCH TO THE SERVER
-            for (var i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
+            for (var i = 0; i <= mainGameState.activePage.children.length - 1; i++) {
                 //searches all word checkmarks
-                if (touchedbutton == mainGameState.dictionary.children[i].children[1]) {
+                if (touchedbutton == mainGameState.activePage.children[i].children[1]) {
                     touchedbutton.children[0].visible = !touchedbutton.children[0].visible;
                     if (touchedbutton.children[0].visible) {
                         console.log(mainGameState.phrasetoCompare);
                         Client.sendForCompare({
                             id: myPlayerID,
+                            page: mainGameState.activePage.key,
                             phrase: mainGameState.phrasetoCompare,
                             word: i
                         });
+                        return;
                     }
 
                 }
@@ -335,9 +485,9 @@ mainGameState.OnDefineDown = function (touchedbutton) {
         }
 
         if (touchedbutton.key == 'symbolspace') {
-            for (var i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
-                if (touchedbutton == mainGameState.dictionary.children[i].children[0]) {
-                    if (mainGameState.dictionary.children[i].children[1].visible) {
+            for (var i = 0; i <= mainGameState.activePage.children.length - 1; i++) {
+                if (touchedbutton == mainGameState.activePage.children[i].children[0]) {
+                    if (mainGameState.activePage.children[i].children[1].visible) {
                         var edit = true;
                     } else {
                         edit = false;
@@ -362,9 +512,9 @@ mainGameState.OnDefineDown = function (touchedbutton) {
                 }
 
                 //TURNS OFF CHECKMARK IF YOU CHANGE INPUT
-                for (i = 2; i <= mainGameState.dictionary.children.length - 1; i++) {
-                    if (touchedbutton == mainGameState.dictionary.children[i].children[0]) {
-                        mainGameState.dictionary.children[i].children[1].children[0].visible = false;
+                for (i = 0; i <= mainGameState.activePage.children.length - 1; i++) {
+                    if (touchedbutton == mainGameState.activePage.children[i].children[0]) {
+                        mainGameState.activePage.children[i].children[1].children[0].visible = false;
                     }
                 }
             }
@@ -379,13 +529,18 @@ mainGameState.OnDefineUp = function (touchedbutton) {
     flip5 = true;
 }
 
-mainGameState.match = function (word, phrase) {
-    console.log("match with " + word + " of phrase " +
-        phrase);
-    //this needs to lock down the correct symbol combo
-    //this should probably be based on the "word"
-    //word should be able to be inserted into a path
-    mainGameState.dictionary.children[word].children[1].visible = false;
+mainGameState.match = function (word, phrase, page) {
+    mainGameState.active;
+    if (page == "page1") {
+        active = mainGameState.Page1;
+    } else if (page == "page2") {
+        active = mainGameState.Page2;
+    } else if (page == "page3") {
+        active = mainGameState.Page3;
+    } else if (page == "page4") {
+        active = mainGameState.Page4;
+    }
+    active.children[word].children[1].visible = false;
 }
 
 mainGameState.OnSymbolDown = function (touchedbutton) {
@@ -569,7 +724,7 @@ mainGameState.endSpeech = function () {
 //THIS FUNCTION MOVES THE PLAYERS
 mainGameState.movePlayer = function () {
 
-    if (myPlayerID >= 0 && !dictionaryOpen) {
+    if (myPlayerID >= 0) {
         var player = this.playerList[myPlayerID];
         var moved = false;
         var speed = 7;
