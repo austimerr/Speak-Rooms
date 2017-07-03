@@ -35,10 +35,21 @@ var mainGameState = {};
 
 mainGameState.preload = function () {
     game.load.image('player1', 'assets/redplayer.png');
-    game.load.image('player2', 'assets/blueplayer.png');
+    game.load.image('redsad', 'assets/redsad.png');
+    game.load.image('redmad', 'assets/redmad.png');
+    game.load.image('redscared', 'assets/redscared.png');
+    game.load.image('redhappy', 'assets/redhappy.png');
+
+
+    game.load.image('player2', 'assets/blueplayer2.png');
+    game.load.image('bluesad', 'assets/bluesad.png');
+    game.load.image('bluemad', 'assets/bluemad.png');
+    game.load.image('bluescared', 'assets/bluescared.png');
+    game.load.image('bluehappy', 'assets/bluehappy.png');
+
     game.load.image('line', 'assets/line.png');
-    game.load.image('bubble1', 'assets/bubble1.png');
     game.load.image('bubble2', 'assets/speechbubble.png');
+
 
     //Symbols
     game.load.image('symbol1', 'assets/symbol1.png');
@@ -105,21 +116,30 @@ mainGameState.create = function () {
         down: game.input.keyboard.addKey(Phaser.Keyboard.S)
     };
 
+    this.emotions = {
+        sad: game.input.keyboard.addKey(Phaser.Keyboard.ONE),
+        mad: game.input.keyboard.addKey(Phaser.Keyboard.TWO),
+        happy: game.input.keyboard.addKey(Phaser.Keyboard.THREE),
+        scared: game.input.keyboard.addKey(Phaser.Keyboard.FOUR),
+        neutral: game.input.keyboard.addKey(Phaser.Keyboard.FIVE)
+    };
+
     this.space = {
         spacebar: game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
     };
 
     //UI FUNCTION
+    Client.askNewPlayer();
 
     mainGameState.populateSymbols();
     mainGameState.populateDictionary();
-    Client.askNewPlayer();
 
     //TEXT TO BE SEEN WHEN A PLAYER IS UNABLE TO PLAY
 
-    mainGameState.text = game.add.text(game.world.centerX, 0, ' Sorry, this room is full.');
-    mainGameState.text.anchor.set(0.5);
-    mainGameState.text.align = 'left';
+    mainGameState.text = game.add.text(150, 300, ' Sorry, this room\nis full.');
+    mainGameState.text.anchor.setTo(0, 0);
+    mainGameState.text.align = "center";
+    mainGameState.text.fixedToCamera = true;
 
     mainGameState.text.font = 'Arial Black';
     mainGameState.text.fontSize = 50;
@@ -130,6 +150,7 @@ mainGameState.create = function () {
 mainGameState.populateSymbols = function () {
 
     //THIS FUNCTION FILLS OUT THE MENU ON THE LEFT OF THE SCREEN
+
     //ACTS AS A KEYBOARD
 
     mainGameState.phrase = {};
@@ -170,6 +191,8 @@ mainGameState.populateSymbols = function () {
 mainGameState.populateDictionary = function () {
 
     //POPULATES THE DICTIONARY MENU AT THE BOTTOM OF THE SCREEN 
+
+
 
     mainGameState.dictionary = game.add.sprite(0, 690, 'dictionary');
     mainGameState.dictionary.fixedToCamera = true;
@@ -213,9 +236,9 @@ mainGameState.populateDictionary = function () {
 
     //Array featuring all words
     var dictionaryarray = ['Page1: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
-                           'Page2: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
-                           'Page3: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
-                           'Page4: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: '];
+                           'Page2: ', 'Hard: ', 'Easy: ', 'Push: ', 'Pull: ', 'Kill: ', 'Touch: ', 'Avoid: ',
+                           'Page3: ', 'Mean: ', 'Friendly: ', 'Bumpy: ', 'Smooth: ', 'Pointy: ', 'Round: ', 'Throw: ',
+                           'Page4: ', 'Eat: ', 'Dangerous: ', 'Helpful: ', 'Monster: ', 'Animal: ', 'Goal: ', 'Team: '];
 
     for (var i = 0; i <= dictionaryarray.length - 1; i++) {
         //Page 1
@@ -334,78 +357,115 @@ mainGameState.addNewPlayer = function (id, x, y) {
     mainGameState.playerList[id].children[0].visible = false;
     mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
 
+    if (id == 1) {
+        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redhappy'));
+        eye.visible = false;
+        eye.smoothed = false;
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redsad'));
+        eye.visible = false;
+        eye.smoothed = false;
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redmad'));
+        eye.visible = false;
+        eye.smoothed = false;
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redscared'));
+        eye.visible = false;
+        eye.smoothed = false;
+    } else if (id == 2) {
+        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluehappy'));
+        eye.visible = false;
+        eye.smoothed = false;
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluesad'));
+        eye.visible = false;
+        eye.smoothed = false;
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluemad'));
+        eye.visible = false;
+        eye.smoothed = false;
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluescared'));
+        eye.visible = false;
+        eye.smoothed = false;
+    }
+
     game.camera.follow(mainGameState.playerList[myPlayerID]);
 };
 
 mainGameState.update = function () {
-    this.movePlayer();
-    game.camera.follow(mainGameState.playerList[myPlayerID]);
 
-    //DIRECT MOUSE IMPUT TO VARIOUS FUNCTIONS. SHORTEN LATER THROUGH LOOPS
+    if (myPlayerID == 1 || myPlayerID == 2) {
+        this.movePlayer();
+        mainGameState.requestEmote();
+        game.camera.follow(mainGameState.playerList[myPlayerID]);
 
-    for (var i = 0; i <= mainGameState.symbols.children.length - 1; i++) {
-        mainGameState.symbols.children[i].events.onInputDown.add(mainGameState.OnSymbolDown, this);
-        mainGameState.symbols.children[i].events.onInputUp.add(mainGameState.OnSymbolUp, this);
-    }
+        //DIRECT MOUSE IMPUT TO VARIOUS FUNCTIONS. SHORTEN LATER THROUGH LOOPS
 
-    if (mainGameState.dictionary.children) {
+        for (var i = 0; i <= mainGameState.symbols.children.length - 1; i++) {
+            mainGameState.symbols.children[i].events.onInputDown.add(mainGameState.OnSymbolDown, this);
+            mainGameState.symbols.children[i].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+        }
 
-        mainGameState.dictionary.children[4].events.onInputDown.add(mainGameState.OnSymbolDown, this);
-        mainGameState.dictionary.children[4].events.onInputUp.add(mainGameState.OnSymbolUp, this);
-    }
+        if (mainGameState.dictionary.children) {
 
-    if (myPlayerID >= 0) {
+            mainGameState.dictionary.children[4].events.onInputDown.add(mainGameState.OnSymbolDown, this);
+            mainGameState.dictionary.children[4].events.onInputUp.add(mainGameState.OnSymbolUp, this);
+        }
 
-        mainGameState.playerList[myPlayerID].events.onInputDown.add(mainGameState.OnPlayerDown, this);
-        mainGameState.playerList[myPlayerID].events.onInputUp.add(mainGameState.OnPlayerUp, this);
+        if (myPlayerID >= 0) {
 
-    };
+            mainGameState.playerList[myPlayerID].events.onInputDown.add(mainGameState.OnPlayerDown, this);
+            mainGameState.playerList[myPlayerID].events.onInputUp.add(mainGameState.OnPlayerUp, this);
 
-    mainGameState.oneButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
-    mainGameState.twoButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
-    mainGameState.threeButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
-    mainGameState.fourButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+        };
 
-    //FOR LOOP FOR THE DEFINED WORDS
-    if (mainGameState.Page1.children && mainGameState.Page2.children && mainGameState.Page3.children && mainGameState.Page4.children) {
-        for (i = 0; i <= mainGameState.Page1.children.length - 1; i++) {
-            if (mainGameState.dictionary.children[i]) {
-                mainGameState.Page1.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page1.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
-                mainGameState.Page1.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page1.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+        mainGameState.oneButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+        mainGameState.twoButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+        mainGameState.threeButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
+        mainGameState.fourButton.events.onInputDown.add(mainGameState.dictionaryButtonPressed, this);
 
-                mainGameState.Page2.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page2.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
-                mainGameState.Page2.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page2.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+        //FOR LOOP FOR THE DEFINED WORDS
+        if (mainGameState.Page1.children && mainGameState.Page2.children && mainGameState.Page3.children && mainGameState.Page4.children) {
+            for (i = 0; i <= mainGameState.Page1.children.length - 1; i++) {
+                if (mainGameState.dictionary.children[i]) {
+                    mainGameState.Page1.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page1.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                    mainGameState.Page1.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page1.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
 
-                mainGameState.Page3.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page3.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
-                mainGameState.Page3.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page3.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+                    mainGameState.Page2.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page2.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                    mainGameState.Page2.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page2.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
 
-                mainGameState.Page4.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page4.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
-                mainGameState.Page4.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
-                mainGameState.Page4.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+                    mainGameState.Page3.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page3.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                    mainGameState.Page3.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page3.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+
+                    mainGameState.Page4.children[i].children[0].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page4.children[i].children[0].events.onInputUp.add(mainGameState.OnDefineUp, this);
+                    mainGameState.Page4.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineDown, this);
+                    mainGameState.Page4.children[i].children[1].events.onInputDown.add(mainGameState.OnDefineUp, this);
+                }
             }
         }
-    }
 
-    if (dictionaryOpen && flip8) {
-        Client.dictionaryInUse();
-        flip8 = false;
-        //this needs to take into account only the dictionary that was opened
-    } else if (!dictionaryOpen && flip7) {
-        mainGameState.dictionaryCloseRequest();
+        if (dictionaryOpen && flip8) {
+            Client.dictionaryInUse();
+            flip8 = false;
+            //this needs to take into account only the dictionary that was opened
+        } else if (!dictionaryOpen && flip7) {
+            mainGameState.dictionaryCloseRequest();
+        }
     }
 }
 
 mainGameState.dictionaryInUse = function (id) {
     console.log("dictionary opened");
     mainGameState.idtoDestroy = id;
-    var emblem = mainGameState.playerList[id].addChild(game.make.sprite(-2, 5, 'dictionaryopen'));
+    if (id == 1) {
+        var emblem = mainGameState.playerList[id].addChild(game.make.sprite(-2, 5, 'dictionaryopen'));
+    }
+    if (id == 2) {
+        var emblem = mainGameState.playerList[id].addChild(game.make.sprite(-1, 23, 'dictionaryopen'));
+    }
     //var emblem = mainGameState.playerList[id].children[0].addChild(game.make.sprite(-50, 0, 'dictionaryopen'));
     emblem.anchor.setTo(0.5, 0.5);
     emblem.smoothed = false;
@@ -446,7 +506,7 @@ mainGameState.dictionaryButtonPressed = function (touchedbutton) {
 
 mainGameState.dictionaryCloseRequest = function () {
     if (myPlayerID == mainGameState.idtoDestroy) {
-        console.log("dictionary closed");
+        console.log("dictionary closed request sent by game");
         flip8 = true;
         Client.requestDictionaryClose();
         flip7 = false;
@@ -454,7 +514,7 @@ mainGameState.dictionaryCloseRequest = function () {
 }
 
 mainGameState.dictionaryClosed = function (id) {
-    mainGameState.playerList[id].children[1].destroy();
+    mainGameState.playerList[id].children[5].destroy();
 }
 
 mainGameState.OnDefineDown = function (touchedbutton) {
@@ -601,7 +661,7 @@ mainGameState.expandSymbols = function () {
         //ANIMATES THE EXPANSION AND COMPRESSION OF THE SYMBOL MENU ON CLICK "OPEN"
         game.add.tween(mainGameState.symbols.cameraOffset).to({
             x: 0
-        }, 1200, Phaser.Easing.Bounce.Out, true);
+        }, 700, Phaser.Easing.Bounce.Out, true);
         flip1 = false;
     } else if (!flip1) {
 
@@ -631,7 +691,7 @@ mainGameState.expandDictionary = function () {
         //ANIMATES EXPANSION AND COMPRESSION OF DICTIONARY MENU
         game.add.tween(mainGameState.dictionary.cameraOffset).to({
             y: 150
-        }, 1000, Phaser.Easing.Bounce.Out, true);
+        }, 600, Phaser.Easing.Bounce.Out, true);
         dictionaryOpen = true;
         flip4 = false;
     } else if (!flip4) {
@@ -719,6 +779,73 @@ mainGameState.endSpeech = function () {
         mainGameState.playerList[mainGameState.idtoDestroy].children[0].visible = false;
     }
 
+}
+
+mainGameState.requestEmote = function () {
+    if (this.emotions.happy.isDown) {
+        Client.requestEmote({
+            id: myPlayerID,
+            emotion: "happy"
+        });
+
+    }
+    if (this.emotions.sad.isDown) {
+        Client.requestEmote({
+            id: myPlayerID,
+            emotion: "sad"
+        });
+    }
+    if (this.emotions.mad.isDown) {
+        Client.requestEmote({
+            id: myPlayerID,
+            emotion: "mad"
+        });
+    }
+    if (this.emotions.scared.isDown) {
+        Client.requestEmote({
+            id: myPlayerID,
+            emotion: "scared"
+        });
+    }
+    if (this.emotions.neutral.isDown) {
+        Client.requestEmote({
+            id: myPlayerID,
+            emotion: "neutral"
+        });
+    }
+}
+
+mainGameState.emote = function (id, emotion) {
+    if (emotion == "happy") {
+        mainGameState.playerList[id].children[1].visible = true;
+        mainGameState.playerList[id].children[2].visible = false;
+        mainGameState.playerList[id].children[3].visible = false;
+        mainGameState.playerList[id].children[4].visible = false;
+    }
+    if (emotion == "sad") {
+        mainGameState.playerList[id].children[1].visible = false;
+        mainGameState.playerList[id].children[2].visible = true;
+        mainGameState.playerList[id].children[3].visible = false;
+        mainGameState.playerList[id].children[4].visible = false;
+    }
+    if (emotion == "mad") {
+        mainGameState.playerList[id].children[1].visible = false;
+        mainGameState.playerList[id].children[2].visible = false;
+        mainGameState.playerList[id].children[3].visible = true;
+        mainGameState.playerList[id].children[4].visible = false;
+    }
+    if (emotion == "scared") {
+        mainGameState.playerList[id].children[1].visible = false;
+        mainGameState.playerList[id].children[2].visible = false;
+        mainGameState.playerList[id].children[3].visible = false;
+        mainGameState.playerList[id].children[4].visible = true;
+    }
+    if (emotion == "neutral") {
+        mainGameState.playerList[id].children[1].visible = false;
+        mainGameState.playerList[id].children[2].visible = false;
+        mainGameState.playerList[id].children[3].visible = false;
+        mainGameState.playerList[id].children[4].visible = false;
+    }
 }
 
 //THIS FUNCTION MOVES THE PLAYERS

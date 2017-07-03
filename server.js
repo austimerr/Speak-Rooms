@@ -25,7 +25,7 @@ httpServer.lastPlayerID = 0;
 httpServer.definitions = {};
 httpServer.definitionIndex = 0;
 
-httpServer.listen(8081, function () {
+httpServer.listen(8090, function () {
     console.log('Listening on ' + httpServer.address().port);
 });
 
@@ -70,6 +70,10 @@ io.on('connection', function (socket) {
             socket.broadcast.emit('move', socket.player);
         });
 
+        socket.on('emote', function (data) {
+            io.emit('emote', data);
+        });
+
         socket.on('phrase', function (data) {
             socket.player.phrase = data;
             console.log(socket.player.phrase);
@@ -83,10 +87,6 @@ io.on('connection', function (socket) {
             if (httpServer.p2data) {
                 if (httpServer.p1data.word == httpServer.p2data.word) {
                     console.log("word match");
-                    //for loop?
-                    //this loop has to go through the length of phrase
-                    //if index of one does not = index of other exit loop
-                    //if loop can successfully check up to length then send match message 
                     var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
                     var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
                     if (size1 >= 0 && size2 >= 0) {
@@ -162,6 +162,7 @@ io.on('connection', function (socket) {
         });
 
         socket.on('dictionaryclose', function () {
+            console.log("server receives request to close dictionary");
             io.emit('dictionaryclose', socket.player.id);
         });
 

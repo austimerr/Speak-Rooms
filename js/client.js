@@ -1,6 +1,6 @@
 // For server, need to add + ":8081" to address until we figure
 // out WTF is going on with socket.io
-var address = window.location.origin + ":8081";
+var address = window.location.origin + ":8090";
 
 var Client = {};
 Client.socket = io.connect(address);
@@ -12,6 +12,10 @@ Client.askNewPlayer = function () {
 
 Client.updatePosition = function (data) {
     Client.socket.emit('move', data);
+};
+
+Client.requestEmote = function (data) {
+    Client.socket.emit('emote', data);
 };
 
 
@@ -33,6 +37,7 @@ Client.dictionaryInUse = function () {
 };
 
 Client.requestDictionaryClose = function () {
+    console.log("client receives request to close dictionary");
     Client.socket.emit('dictionaryclose');
 }
 
@@ -60,6 +65,10 @@ Client.socket.on('you', function (data) {
 
 Client.socket.on('move', function (data) {
     mainGameState.updateOtherPlayer(data.id, data.x, data.y);
+});
+
+Client.socket.on('emote', function (data) {
+    mainGameState.emote(data.id, data.emotion);
 });
 
 
