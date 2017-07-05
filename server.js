@@ -36,8 +36,8 @@ io.on('connection', function (socket) {
         if (httpServer.lastPlayerID < 2) {
             httpServer.lastPlayerID++;
             if (httpServer.lastPlayerID == 1) {
-                var x = 400;
-                var y = 200;
+                var x = 350;
+                var y = 300;
 
                 socket.player = {
                     id: httpServer.lastPlayerID,
@@ -46,8 +46,8 @@ io.on('connection', function (socket) {
                     phrase: {}
                 };
             } else if (httpServer.lastPlayerID == 2) {
-                var x = 400;
-                var y = 600;
+                var x = 1100;
+                var y = 700;
 
                 socket.player = {
                     id: httpServer.lastPlayerID,
@@ -68,6 +68,10 @@ io.on('connection', function (socket) {
             socket.player.x = data.x;
             socket.player.y = data.y;
             socket.broadcast.emit('move', socket.player);
+        });
+
+        socket.on('click', function (data) {
+            io.emit('click', data);
         });
 
         socket.on('emote', function (data) {

@@ -14,6 +14,10 @@ Client.updatePosition = function (data) {
     Client.socket.emit('move', data);
 };
 
+Client.clickRequest = function (data) {
+    Client.socket.emit('click', data);
+}
+
 Client.requestEmote = function (data) {
     Client.socket.emit('emote', data);
 };
@@ -65,6 +69,10 @@ Client.socket.on('you', function (data) {
 
 Client.socket.on('move', function (data) {
     mainGameState.updateOtherPlayer(data.id, data.x, data.y);
+});
+
+Client.socket.on('click', function (data) {
+    mainGameState.click(data.id, data.x, data.y);
 });
 
 Client.socket.on('emote', function (data) {

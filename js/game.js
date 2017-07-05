@@ -34,11 +34,15 @@ var game = new Phaser.Game(
 var mainGameState = {};
 
 mainGameState.preload = function () {
+    game.load.image('background', 'assets/background.png');
+    game.load.image('testbackground', 'assets/background2.png');
+
     game.load.image('player1', 'assets/redplayer.png');
-    game.load.image('redsad', 'assets/redsad.png');
     game.load.image('redmad', 'assets/redmad.png');
     game.load.image('redscared', 'assets/redscared.png');
     game.load.image('redhappy', 'assets/redhappy.png');
+    game.load.image('redconfused', 'assets/redconfused.png');
+    game.load.image('redpoint', 'assets/redpoint.png');
 
 
     game.load.image('player2', 'assets/blueplayer2.png');
@@ -46,6 +50,8 @@ mainGameState.preload = function () {
     game.load.image('bluemad', 'assets/bluemad.png');
     game.load.image('bluescared', 'assets/bluescared.png');
     game.load.image('bluehappy', 'assets/bluehappy.png');
+    game.load.image('blueconfused', 'assets/blueconfused.png');
+    game.load.image('bluepoint', 'assets/bluepoint.png');
 
     game.load.image('line', 'assets/line.png');
     game.load.image('bubble2', 'assets/speechbubble.png');
@@ -90,11 +96,20 @@ mainGameState.create = function () {
     this.playerList = {};
     mainGameState.phrasetoCompare = [];
 
-    game.world.setBounds(0, 0, 1920, 1920);
+    game.world.setBounds(0, 0, 1600, 1600);
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    game.stage.backgroundColor = "#737c93";
+    game.canvas.oncontextmenu = function (e) {
+        e.preventDefault();
+    }
+
+    var background = game.add.sprite(0, 0, 'testbackground');
+    background.inputEnabled = true;
+    background.smoothed = false;
+    background.scale.setTo(4, 4);
+    background.events.onInputDown.add(mainGameState.clickRequest, this);
+    game.input.mouse.capture = true;
 
     mainGameState.gruntSound = game.add.audio('grunt');
     mainGameState.clickSound = game.add.audio('click');
@@ -146,6 +161,35 @@ mainGameState.create = function () {
     mainGameState.text.fontWeight = 'bold';
     mainGameState.text.fill = '#000000';
 };
+
+mainGameState.clickRequest = function (sprite, pointer) {
+    if (pointer.rightButton.isDown) {
+        console.log("right button hit");
+        Client.clickRequest({
+            id: myPlayerID,
+            x: pointer.positionDown.x + game.camera.x,
+            y: pointer.positionDown.y + game.camera.y
+        });
+    }
+}
+
+mainGameState.click = function (id, x, y) {
+    console.log("message returned to game");
+    if (id == 1) {
+        if (mainGameState.pointer1) {
+            mainGameState.pointer1.destroy();
+        }
+        mainGameState.pointer1 = game.add.sprite(x - 70, y - 20, 'redpoint');
+        mainGameState.pointer1.scale.setTo(2, 2);
+    };
+    if (id == 2) {
+        if (mainGameState.pointer2) {
+            mainGameState.pointer2.destroy();
+        }
+        mainGameState.pointer2 = game.add.sprite(x - 35, y - 20, 'bluepoint');
+        mainGameState.pointer2.scale.setTo(2, 2);
+    };
+}
 
 mainGameState.populateSymbols = function () {
 
@@ -235,7 +279,7 @@ mainGameState.populateDictionary = function () {
     //WHEN YOU WANT TO SEARCH THROUGH THE ACTUAL DEFINED WORDS START WITH I = 2 (INDEX OF GREEN IN CHILDREN)
 
     //Array featuring all words
-    var dictionaryarray = ['Page1: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ', 'Happy: ', 'Sad: ',
+    var dictionaryarray = ['Yes: ', 'No: ', 'Blue: ', 'Red: ', 'Circle: ', 'Square: ', 'Red\nPlayer: ', 'Blue\nPlayer: ',
                            'Page2: ', 'Hard: ', 'Easy: ', 'Push: ', 'Pull: ', 'Kill: ', 'Touch: ', 'Avoid: ',
                            'Page3: ', 'Mean: ', 'Friendly: ', 'Bumpy: ', 'Smooth: ', 'Pointy: ', 'Round: ', 'Throw: ',
                            'Page4: ', 'Eat: ', 'Dangerous: ', 'Helpful: ', 'Monster: ', 'Animal: ', 'Goal: ', 'Team: '];
@@ -361,7 +405,7 @@ mainGameState.addNewPlayer = function (id, x, y) {
         var eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redhappy'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redsad'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redconfused'));
         eye.visible = false;
         eye.smoothed = false;
         eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redmad'));
@@ -371,16 +415,16 @@ mainGameState.addNewPlayer = function (id, x, y) {
         eye.visible = false;
         eye.smoothed = false;
     } else if (id == 2) {
-        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluehappy'));
+        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'bluehappy'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluesad'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'blueconfused'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluemad'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'bluemad'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-16, -5, 'bluescared'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'bluescared'));
         eye.visible = false;
         eye.smoothed = false;
     }
@@ -792,7 +836,7 @@ mainGameState.requestEmote = function () {
     if (this.emotions.sad.isDown) {
         Client.requestEmote({
             id: myPlayerID,
-            emotion: "sad"
+            emotion: "confused"
         });
     }
     if (this.emotions.mad.isDown) {
@@ -822,7 +866,7 @@ mainGameState.emote = function (id, emotion) {
         mainGameState.playerList[id].children[3].visible = false;
         mainGameState.playerList[id].children[4].visible = false;
     }
-    if (emotion == "sad") {
+    if (emotion == "confused") {
         mainGameState.playerList[id].children[1].visible = false;
         mainGameState.playerList[id].children[2].visible = true;
         mainGameState.playerList[id].children[3].visible = false;
