@@ -6,6 +6,7 @@ const LEFT_ARROW = 3;
 var MOVEMENT = 7;
 
 var myPlayerID = -1;
+var otherPlayerID = -1;
 
 //VARIOUS TOGGLES 
 var flip1 = true;
@@ -37,21 +38,23 @@ mainGameState.preload = function () {
     game.load.image('background', 'assets/background.png');
     game.load.image('testbackground', 'assets/background2.png');
 
-    game.load.image('player1', 'assets/redplayer.png');
+    game.load.spritesheet('player1', 'assets/redspritesheet.png', 49, 66);
     game.load.image('redmad', 'assets/redmad.png');
     game.load.image('redscared', 'assets/redscared.png');
     game.load.image('redhappy', 'assets/redhappy.png');
     game.load.image('redconfused', 'assets/redconfused.png');
     game.load.image('redpoint', 'assets/redpoint.png');
+    game.load.image('indicator', 'assets/indicator.png');
 
 
-    game.load.image('player2', 'assets/blueplayer2.png');
+    game.load.spritesheet('player2', 'assets/bluespritesheet.png', 49, 66);
     game.load.image('bluesad', 'assets/bluesad.png');
     game.load.image('bluemad', 'assets/bluemad.png');
     game.load.image('bluescared', 'assets/bluescared.png');
     game.load.image('bluehappy', 'assets/bluehappy.png');
     game.load.image('blueconfused', 'assets/blueconfused.png');
     game.load.image('bluepoint', 'assets/bluepoint.png');
+    game.load.image('indicator2', 'assets/indicator2.png');
 
     game.load.image('line', 'assets/line.png');
     game.load.image('bubble2', 'assets/speechbubble.png');
@@ -113,6 +116,12 @@ mainGameState.create = function () {
 
     mainGameState.gruntSound = game.add.audio('grunt');
     mainGameState.clickSound = game.add.audio('click');
+
+    mainGameState.indicator = game.add.sprite(0, 0, 'indicator');
+    mainGameState.indicator.visible = false;
+
+    mainGameState.indicator2 = game.add.sprite(0, 0, 'indicator2');
+    mainGameState.indicator2.visible = false;
 
 
     game.input.keyboard.addKeyCapture(
@@ -379,8 +388,28 @@ mainGameState.addNewPlayer = function (id, x, y) {
     // --- Player Initialization ---
     if (id == 1) {
         mainGameState.playerList[id] = game.add.sprite(x, y, 'player1');
+        mainGameState.playerList[id].animations.add('forward', [0], 8, true);
+        mainGameState.playerList[id].animations.add('forwardRight', [1], 8, true);
+        mainGameState.playerList[id].animations.add('right', [2], 8, true);
+        mainGameState.playerList[id].animations.add('backRight', [3], 8, true);
+        mainGameState.playerList[id].animations.add('back', [4], 8, true);
+        mainGameState.playerList[id].animations.add('backLeft', [5], 8, true);
+        mainGameState.playerList[id].animations.add('left', [6], 8, true);
+        mainGameState.playerList[id].animations.add('forwardLeft', [7], 8, true);
+        mainGameState.player1x = mainGameState.playerList[id].x;
+        mainGameState.player1y = mainGameState.playerList[id].y;
     } else if (id == 2) {
         mainGameState.playerList[id] = game.add.sprite(x, y, 'player2');
+        mainGameState.playerList[id].animations.add('forward', [0], 8, true);
+        mainGameState.playerList[id].animations.add('forwardRight', [1], 8, true);
+        mainGameState.playerList[id].animations.add('right', [2], 8, true);
+        mainGameState.playerList[id].animations.add('backRight', [3], 8, true);
+        mainGameState.playerList[id].animations.add('back', [4], 8, true);
+        mainGameState.playerList[id].animations.add('backLeft', [5], 8, true);
+        mainGameState.playerList[id].animations.add('left', [6], 8, true);
+        mainGameState.playerList[id].animations.add('forwardLeft', [7], 8, true);
+        mainGameState.player2x = mainGameState.playerList[id].x;
+        mainGameState.player2y = mainGameState.playerList[id].y;
     }
     mainGameState.playerList[id].anchor.setTo(.5, .5);
     mainGameState.playerList[id].scale.setTo(2, 2);
@@ -415,16 +444,16 @@ mainGameState.addNewPlayer = function (id, x, y) {
         eye.visible = false;
         eye.smoothed = false;
     } else if (id == 2) {
-        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'bluehappy'));
+        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluehappy'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'blueconfused'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'blueconfused'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'bluemad'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluemad'));
         eye.visible = false;
         eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-15.5, -4.4, 'bluescared'));
+        eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluescared'));
         eye.visible = false;
         eye.smoothed = false;
     }
@@ -438,6 +467,10 @@ mainGameState.update = function () {
         this.movePlayer();
         mainGameState.requestEmote();
         game.camera.follow(mainGameState.playerList[myPlayerID]);
+
+        this.animatePlayers();
+
+        this.playerIndicator();
 
         //DIRECT MOUSE IMPUT TO VARIOUS FUNCTIONS. SHORTEN LATER THROUGH LOOPS
 
@@ -500,6 +533,214 @@ mainGameState.update = function () {
         }
     }
 }
+
+mainGameState.playerIndicator = function () {
+    if (myPlayerID == 1) {
+        var myIndicator = mainGameState.indicator;
+    }
+    if (myPlayerID == 2) {
+        var myIndicator = mainGameState.indicator2;
+    }
+
+    if (mainGameState.playerList[otherPlayerID] && mainGameState.playerList[myPlayerID]) {
+
+        var deltaX = mainGameState.playerList[otherPlayerID].x - mainGameState.playerList[myPlayerID].x;
+        var deltaY = mainGameState.playerList[otherPlayerID].y - mainGameState.playerList[myPlayerID].y;
+        if (!mainGameState.playerList[otherPlayerID].inCamera) {
+            myIndicator.visible = true;
+            var m = deltaY / deltaX;
+            var b = mainGameState.playerList[myPlayerID].y - (mainGameState.playerList[myPlayerID].x * m);
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                if (deltaX > 0) {
+                    //all of this is relative to the camera
+                    var x = game.camera.x + 750;
+                    var y = x * m + b;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                    console.log("delta X greater than deltaY and deltaX > 0");
+                } else if (deltaX < 0) {
+                    var x = game.camera.x + 50;
+                    var y = x * m + b;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                } else if (deltaX == 0) {
+                    var x = mainGameState.playerList[myPlayerID].x;
+                    var y = game.camera.y + 50;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                }
+            } else if (Math.abs(deltaX) < Math.abs(deltaY)) {
+                if (deltaY > 0) {
+                    var y = game.camera.y + 750;
+                    var x = (y - b) / m;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                    console.log("delta Y greater than deltaX and deltaY > 0");
+                    console.log("m: " + m + "b: " + b);
+                } else if (deltaY < 0) {
+                    var y = game.camera.y + 50;
+                    var x = (y - b) / m;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                    console.log("delta Y greater than deltaX and deltaY  0");
+                    console.log("m: " + m + "b: " + b);
+
+                } else if (deltaY == 0) {
+                    var y = mainGameState.playerList[myPlayerID].y;
+                    var x = game.camera.x + 50;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                }
+            } else if (Math.abs(deltaX) == Math.abs(deltaY)) {
+                if (deltaX > 0) {
+                    var x = game.camera.x + 750;
+                    var y = game.camera.y + 750;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                } else if (deltaX < 0) {
+                    var x = game.camera.x + 50;
+                    var y = game.camera.y + 50;
+                    myIndicator.x = x;
+                    myIndicator.y = y;
+                }
+
+            }
+            console.log("x: " + x + "y: " + y);
+        } else {
+            myIndicator.visible = false;
+        }
+
+
+    }
+}
+
+mainGameState.animatePlayers = function () {
+
+    //Optimize later
+    if (mainGameState.playerList[1]) {
+
+        if (mainGameState.playerList[1].x - mainGameState.player1x > 0 && mainGameState.playerList[1].y - mainGameState.player1y == 0) {
+            mainGameState.playerList[1].animations.play('right');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x < 0 && mainGameState.playerList[1].y - mainGameState.player1y == 0) {
+            mainGameState.playerList[1].animations.play('left');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x == 0 && mainGameState.playerList[1].y - mainGameState.player1y < 0) {
+            mainGameState.playerList[1].animations.play('back');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x == 0 && mainGameState.playerList[1].y - mainGameState.player1y > 0) {
+            mainGameState.playerList[1].animations.play('forward');
+            mainGameState.emote(1, mainGameState.currentEmotion1);
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x > 0 && mainGameState.playerList[1].y - mainGameState.player1y > 0) {
+            mainGameState.playerList[1].animations.play('forwardRight');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x > 0 && mainGameState.playerList[1].y - mainGameState.player1y < 0) {
+            mainGameState.playerList[1].animations.play('backRight');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x < 0 && mainGameState.playerList[1].y - mainGameState.player1y < 0) {
+            mainGameState.playerList[1].animations.play('backLeft');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+        if (mainGameState.playerList[1].x - mainGameState.player1x < 0 && mainGameState.playerList[1].y - mainGameState.player1y > 0) {
+            mainGameState.playerList[1].animations.play('forwardLeft');
+            mainGameState.playerList[1].children[1].visible = false;
+            mainGameState.playerList[1].children[2].visible = false;
+            mainGameState.playerList[1].children[3].visible = false;
+            mainGameState.playerList[1].children[4].visible = false;
+        }
+
+        mainGameState.player1x = mainGameState.playerList[1].x;
+        mainGameState.player1y = mainGameState.playerList[1].y;
+
+    }
+
+    if (mainGameState.playerList[2]) {
+
+        if (mainGameState.playerList[2].x - mainGameState.player2x > 0 && mainGameState.playerList[2].y - mainGameState.player2y == 0) {
+            mainGameState.playerList[2].animations.play('right');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x < 0 && mainGameState.playerList[2].y - mainGameState.player2y == 0) {
+            mainGameState.playerList[2].animations.play('left');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x == 0 && mainGameState.playerList[2].y - mainGameState.player2y < 0) {
+            mainGameState.playerList[2].animations.play('back');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x == 0 && mainGameState.playerList[2].y - mainGameState.player2y > 0) {
+            mainGameState.playerList[2].animations.play('forward');
+            mainGameState.emote(2, mainGameState.currentEmotion2);
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x > 0 && mainGameState.playerList[2].y - mainGameState.player2y > 0) {
+            mainGameState.playerList[2].animations.play('forwardRight');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x > 0 && mainGameState.playerList[2].y - mainGameState.player2y < 0) {
+            mainGameState.playerList[2].animations.play('backRight');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x < 0 && mainGameState.playerList[2].y - mainGameState.player2y < 0) {
+            mainGameState.playerList[2].animations.play('backLeft');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+        if (mainGameState.playerList[2].x - mainGameState.player2x < 0 && mainGameState.playerList[2].y - mainGameState.player2y > 0) {
+            mainGameState.playerList[2].animations.play('forwardLeft');
+            mainGameState.playerList[2].children[1].visible = false;
+            mainGameState.playerList[2].children[2].visible = false;
+            mainGameState.playerList[2].children[3].visible = false;
+            mainGameState.playerList[2].children[4].visible = false;
+        }
+
+        mainGameState.player2x = mainGameState.playerList[2].x;
+        mainGameState.player2y = mainGameState.playerList[2].y;
+    }
+}
+
+
+
 
 mainGameState.dictionaryInUse = function (id) {
     console.log("dictionary opened");
@@ -860,37 +1101,89 @@ mainGameState.requestEmote = function () {
 }
 
 mainGameState.emote = function (id, emotion) {
-    if (emotion == "happy") {
-        mainGameState.playerList[id].children[1].visible = true;
-        mainGameState.playerList[id].children[2].visible = false;
-        mainGameState.playerList[id].children[3].visible = false;
-        mainGameState.playerList[id].children[4].visible = false;
+    if (id == 1) {
+        mainGameState.currentEmotion1 = emotion;
+        if (mainGameState.playerList[id].animations.frame == 0) {
+            if (mainGameState.currentEmotion1 == "happy") {
+                mainGameState.playerList[id].children[1].visible = true;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+            if (mainGameState.currentEmotion1 == "confused") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = true;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+            if (mainGameState.currentEmotion1 == "mad") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = true;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+            if (mainGameState.currentEmotion1 == "scared") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = true;
+            }
+            if (mainGameState.currentEmotion1 == "neutral") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+        } else {
+            mainGameState.playerList[id].children[1].visible = false;
+            mainGameState.playerList[id].children[2].visible = false;
+            mainGameState.playerList[id].children[3].visible = false;
+            mainGameState.playerList[id].children[4].visible = false;
+        }
     }
-    if (emotion == "confused") {
-        mainGameState.playerList[id].children[1].visible = false;
-        mainGameState.playerList[id].children[2].visible = true;
-        mainGameState.playerList[id].children[3].visible = false;
-        mainGameState.playerList[id].children[4].visible = false;
-    }
-    if (emotion == "mad") {
-        mainGameState.playerList[id].children[1].visible = false;
-        mainGameState.playerList[id].children[2].visible = false;
-        mainGameState.playerList[id].children[3].visible = true;
-        mainGameState.playerList[id].children[4].visible = false;
-    }
-    if (emotion == "scared") {
-        mainGameState.playerList[id].children[1].visible = false;
-        mainGameState.playerList[id].children[2].visible = false;
-        mainGameState.playerList[id].children[3].visible = false;
-        mainGameState.playerList[id].children[4].visible = true;
-    }
-    if (emotion == "neutral") {
-        mainGameState.playerList[id].children[1].visible = false;
-        mainGameState.playerList[id].children[2].visible = false;
-        mainGameState.playerList[id].children[3].visible = false;
-        mainGameState.playerList[id].children[4].visible = false;
+
+    if (id == 2) {
+        mainGameState.currentEmotion2 = emotion;
+        if (mainGameState.playerList[id].animations.frame == 0) {
+            if (mainGameState.currentEmotion2 == "happy") {
+                mainGameState.playerList[id].children[1].visible = true;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+            if (mainGameState.currentEmotion2 == "confused") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = true;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+            if (mainGameState.currentEmotion2 == "mad") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = true;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+            if (mainGameState.currentEmotion2 == "scared") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = true;
+            }
+            if (mainGameState.currentEmotion2 == "neutral") {
+                mainGameState.playerList[id].children[1].visible = false;
+                mainGameState.playerList[id].children[2].visible = false;
+                mainGameState.playerList[id].children[3].visible = false;
+                mainGameState.playerList[id].children[4].visible = false;
+            }
+        } else {
+            mainGameState.playerList[id].children[1].visible = false;
+            mainGameState.playerList[id].children[2].visible = false;
+            mainGameState.playerList[id].children[3].visible = false;
+            mainGameState.playerList[id].children[4].visible = false;
+        }
     }
 }
+
 
 //THIS FUNCTION MOVES THE PLAYERS
 mainGameState.movePlayer = function () {
@@ -985,6 +1278,11 @@ mainGameState.updateOtherPlayer = function (id, x, y) {
 
 mainGameState.setID = function (id) {
     myPlayerID = id;
+    if (myPlayerID == 1) {
+        otherPlayerID = 2;
+    } else if (myPlayerID == 2) {
+        otherPlayerID = 1;
+    }
 }
 
 mainGameState.randomNumFromInterval = function (min, max) {
