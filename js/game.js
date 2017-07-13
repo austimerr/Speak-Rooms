@@ -91,6 +91,7 @@ mainGameState.preload = function () {
 
     game.load.audio('grunt', 'assets/grunt.wav');
     game.load.audio('click', 'assets/click.wav');
+    game.load.audio('success', 'assets/success.mp3');
 }
 
 mainGameState.create = function () {
@@ -116,6 +117,7 @@ mainGameState.create = function () {
 
     mainGameState.gruntSound = game.add.audio('grunt');
     mainGameState.clickSound = game.add.audio('click');
+    mainGameState.successSound = game.add.audio('success');
 
     mainGameState.indicator = game.add.sprite(0, 0, 'indicator');
     mainGameState.indicator.visible = false;
@@ -189,6 +191,8 @@ mainGameState.click = function (id, x, y) {
             mainGameState.pointer1.destroy();
         }
         mainGameState.pointer1 = game.add.sprite(x - 70, y - 20, 'redpoint');
+        game.world.swap(mainGameState.pointer1, mainGameState.symbols);
+        game.world.swap(mainGameState.pointer1, mainGameState.dictionary);
         mainGameState.pointer1.scale.setTo(2, 2);
     };
     if (id == 2) {
@@ -197,6 +201,8 @@ mainGameState.click = function (id, x, y) {
         }
         mainGameState.pointer2 = game.add.sprite(x - 35, y - 20, 'bluepoint');
         mainGameState.pointer2.scale.setTo(2, 2);
+        game.world.swap(mainGameState.pointer2, mainGameState.symbols);
+        game.world.swap(mainGameState.pointer2, mainGameState.dictionary);
     };
 }
 
@@ -529,6 +535,7 @@ mainGameState.update = function () {
             flip8 = false;
             //this needs to take into account only the dictionary that was opened
         } else if (!dictionaryOpen && flip7) {
+            console.log("dictionary Open " + dictionaryOpen + "flip7" + flip7);
             mainGameState.dictionaryCloseRequest();
         }
     }
@@ -557,7 +564,6 @@ mainGameState.playerIndicator = function () {
                     var y = x * m + b;
                     myIndicator.x = x;
                     myIndicator.y = y;
-                    console.log("delta X greater than deltaY and deltaX > 0");
                 } else if (deltaX < 0) {
                     var x = game.camera.x + 50;
                     var y = x * m + b;
@@ -575,16 +581,11 @@ mainGameState.playerIndicator = function () {
                     var x = (y - b) / m;
                     myIndicator.x = x;
                     myIndicator.y = y;
-                    console.log("delta Y greater than deltaX and deltaY > 0");
-                    console.log("m: " + m + "b: " + b);
                 } else if (deltaY < 0) {
                     var y = game.camera.y + 50;
                     var x = (y - b) / m;
                     myIndicator.x = x;
                     myIndicator.y = y;
-                    console.log("delta Y greater than deltaX and deltaY  0");
-                    console.log("m: " + m + "b: " + b);
-
                 } else if (deltaY == 0) {
                     var y = mainGameState.playerList[myPlayerID].y;
                     var x = game.camera.x + 50;
@@ -605,7 +606,6 @@ mainGameState.playerIndicator = function () {
                 }
 
             }
-            console.log("x: " + x + "y: " + y);
         } else {
             myIndicator.visible = false;
         }
@@ -743,6 +743,7 @@ mainGameState.animatePlayers = function () {
 
 
 mainGameState.dictionaryInUse = function (id) {
+    flip7 = true;
     console.log("dictionary opened");
     mainGameState.idtoDestroy = id;
     if (id == 1) {
@@ -755,7 +756,6 @@ mainGameState.dictionaryInUse = function (id) {
     emblem.anchor.setTo(0.5, 0.5);
     emblem.smoothed = false;
     emblem.scale.setTo(0.4, 0.4);
-    flip7 = true;
 }
 
 mainGameState.dictionaryButtonPressed = function (touchedbutton) {
@@ -790,16 +790,15 @@ mainGameState.dictionaryButtonPressed = function (touchedbutton) {
 }
 
 mainGameState.dictionaryCloseRequest = function () {
-    if (myPlayerID == mainGameState.idtoDestroy) {
-        console.log("dictionary closed request sent by game");
-        flip8 = true;
-        Client.requestDictionaryClose();
-        flip7 = false;
-    }
+    console.log("dictionary close request activated");
+    flip8 = true;
+    Client.requestDictionaryClose();
 }
 
 mainGameState.dictionaryClosed = function (id) {
-    mainGameState.playerList[id].children[5].destroy();
+    if (mainGameState.playerList[id].children[5]) {
+        mainGameState.playerList[id].children[5].destroy();
+    }
 }
 
 mainGameState.OnDefineDown = function (touchedbutton) {
@@ -820,6 +819,14 @@ mainGameState.OnDefineDown = function (touchedbutton) {
                             id: myPlayerID,
                             page: mainGameState.activePage.key,
                             phrase: mainGameState.phrasetoCompare,
+                            word: i
+                        });
+                        return;
+                    } else if (!touchedbutton.children[0].visible) {
+                        Client.sendForCompare({
+                            id: myPlayerID,
+                            page: mainGameState.activePage.key,
+                            phrase: "",
                             word: i
                         });
                         return;
@@ -875,7 +882,7 @@ mainGameState.OnDefineUp = function (touchedbutton) {
 }
 
 mainGameState.match = function (word, phrase, page) {
-    mainGameState.active;
+    var play = true;
     if (page == "page1") {
         active = mainGameState.Page1;
     } else if (page == "page2") {
@@ -886,6 +893,10 @@ mainGameState.match = function (word, phrase, page) {
         active = mainGameState.Page4;
     }
     active.children[word].children[1].visible = false;
+    if (play == true) {
+        mainGameState.successSound.play();
+        play = false;
+    }
 }
 
 mainGameState.OnSymbolDown = function (touchedbutton) {

@@ -99,15 +99,17 @@ io.on('connection', function (socket) {
                             if (size1 == size2) {
                                 console.log("sizes equal");
                                 for (var i = 0; i <= size1; i++) {
-                                    if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                        console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
-                                        return;
-                                    }
-                                    if (i == size1) {
-                                        console.log("content the same");
-                                        compareSimilarity();
-                                    }
+                                    if (httpServer.p1data.phrase[i] != "" && httpServer.p2data.phrase[i] != "") {
+                                        if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
+                                            console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
+                                            return;
+                                        }
+                                        if (i == size1) {
+                                            console.log("content the same");
+                                            compareSimilarity();
+                                        }
 
+                                    }
                                 }
 
                             } else {
@@ -137,13 +139,15 @@ io.on('connection', function (socket) {
                             if (size1 == size2) {
                                 console.log("sizes equal");
                                 for (var i = 0; i <= size1; i++) {
-                                    if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                        console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
-                                        return;
-                                    }
-                                    if (i == size1) {
-                                        console.log("content the same");
-                                        compareSimilarity();
+                                    if (httpServer.p1data.phrase[i] != "" && httpServer.p2data.phrase[i] != "") {
+                                        if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
+                                            console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
+                                            return;
+                                        }
+                                        if (i == size1) {
+                                            console.log("content the same");
+                                            compareSimilarity();
+                                        }
                                     }
                                 }
 
