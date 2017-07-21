@@ -1,17 +1,25 @@
 // For server, need to add + ":8081" to address until we figure
 // out WTF is going on with socket.io
-var address = window.location.origin + ":8090";
+var address = window.location.origin + ":8005";
+
+var roomname = "";
+var myID = -1;
 
 var Client = {};
 Client.socket = io.connect(address);
 
 Client.askNewPlayer = function () {
-    Client.socket.emit('newplayer');
-    //console.log("Sending new player");
+    console.log("new player in " + roomname + " in client.");
+    Client.socket.emit('newplayer', roomname);
 };
 
 Client.updatePosition = function (data) {
-    Client.socket.emit('move', data);
+    Client.socket.emit('move', {
+        x: data.x,
+        y: data.y,
+        room: roomname
+
+    });
 };
 
 Client.clickRequest = function (data) {
@@ -28,13 +36,20 @@ Client.sendPhrase = function (data) {
 };
 
 Client.sendForCompare = function (data) {
-    console.log("phrase received for compare" + data.page);
-    if (data.id == 1) {
-        Client.socket.emit('1compare', data);
-    } else if (data.id == 2) {
-        Client.socket.emit('2compare', data);
-    }
+    console.log("phrase received for compare" + data.phrase);
+    Client.socket.emit('onPlayerforCompare', {
+        id: data.id,
+        page: data.page,
+        phrase: data.phrase,
+        word: data.word,
+        room: roomname
+    });
 };
+
+Client.otherCheckBox = function (data) {
+    console.log("client receives request for other checkbox");
+    Client.socket.emit('othercheckbox', data);
+}
 
 Client.dictionaryInUse = function () {
     Client.socket.emit('dictionaryopen');
@@ -50,21 +65,34 @@ Client.requestEndSpeech = function () {
     Client.socket.emit('endspeech');
 };
 
+Client.socket.on('yourRoomNum', function (data) {
+    roomname = data;
+    console.log("your room number is " + data);
+    mainGameState.requestNewPlayer();
+});
 
 Client.socket.on('newplayer', function (data) {
+    console.log('new player called in client with id of: ' + data.id);
     mainGameState.addNewPlayer(data.id, data.x, data.y);
 });
 
 
 Client.socket.on('allplayers', function (data) {
+    console.log("all players request received in client");
     for (var i = 0; i < data.length; i++) {
-        mainGameState.addNewPlayer(data[i].id, data[i].x, data[i].y)
+        if (data[i].id) {
+            mainGameState.addNewPlayer(data[i].id, data[i].x, data[i].y)
+        }
     }
 });
 
 
 Client.socket.on('you', function (data) {
-    mainGameState.setID(data);
+    if (myID == -1) {
+        console.log("congrats YOU are you");
+        myID = data;
+        mainGameState.setID(data);
+    }
 });
 
 Client.socket.on('move', function (data) {
@@ -87,7 +115,12 @@ Client.socket.on('phrase', function (data) {
 });
 
 Client.socket.on('match', function (data) {
+    console.log("match received in client");
     mainGameState.match(data.word, data.phrase, data.page);
+});
+
+Client.socket.on('othercheckbox', function (data) {
+    mainGameState.otherCheck(data.page, data.word, data.active);
 });
 
 Client.socket.on('dictionaryopen', function (data) {

@@ -21,211 +21,233 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
+httpServer.totalPlayerCount = 0;
 httpServer.lastPlayerID = 0;
 httpServer.definitions = {};
 httpServer.definitionIndex = 0;
+httpServer.roomArray = [];
 
-httpServer.listen(8090, function () {
+httpServer.listen(8005, function () {
     console.log('Listening on ' + httpServer.address().port);
 });
 
 io.on('connection', function (socket) {
     console.log("Connected!");
-    socket.on('newplayer', function () {
-        console.log("New player received");
-        if (httpServer.lastPlayerID < 2) {
-            httpServer.lastPlayerID++;
-            if (httpServer.lastPlayerID == 1) {
-                var x = 350;
-                var y = 300;
+    httpServer.totalPlayerCount++;
+    var n = httpServer.totalPlayerCount / 2
+    var roomnum = Math.ceil(n).toString();
+    socket.join(roomnum);
+    io.sockets.in(roomnum).emit('yourRoomNum', roomnum);
 
-                socket.player = {
-                    id: httpServer.lastPlayerID,
-                    x: x,
-                    y: y,
-                    phrase: {}
-                };
-            } else if (httpServer.lastPlayerID == 2) {
-                var x = 1100;
-                var y = 700;
 
-                socket.player = {
-                    id: httpServer.lastPlayerID,
-                    x: x,
-                    y: y,
-                    phrase: {}
-                };
-            }
-            socket.emit('allplayers', getAllPlayers());
-            socket.emit('you', socket.player.id);
-            //console.log(getAllPlayers());
-            socket.broadcast.emit('newplayer', socket.player);
+    socket.on('newplayer', function (roomname) {
+        console.log("new player on server");
+        httpServer.lastPlayerID++;
+        if (httpServer.lastPlayerID % 2 != 0) {
+            var x = 350;
+            var y = 300;
 
-        }
+            socket.player = {
+                id: 1,
+                x: x,
+                y: y,
+                phrase: {}
+            };
+            console.log("should be 1: " + socket.player.id);
+        } else if (httpServer.lastPlayerID % 2 == 0) {
+            var x = 1100;
+            var y = 700;
+
+            socket.player = {
+                id: 2,
+                x: x,
+                y: y,
+                phrase: {}
+            };
+            console.log("should be 2: " + socket.player.id);
+        };
+        socket.emit('allplayers', getAllPlayers(roomname));
+        //you is not only going to the requested client
+        socket.emit('you', socket.player.id);
+        socket.broadcast.to(roomname).emit('newplayer', socket.player);
+
 
         socket.on('move', function (data) {
             // Update this player's recorded position in server's socket object
             socket.player.x = data.x;
             socket.player.y = data.y;
-            socket.broadcast.emit('move', socket.player);
+            socket.broadcast.to(roomname).emit('move', socket.player);
         });
 
         socket.on('click', function (data) {
-            io.emit('click', data);
+            io.sockets.in(roomname).emit('click', data);
         });
 
         socket.on('emote', function (data) {
-            io.emit('emote', data);
+            io.sockets.in(roomname).emit('emote', data);
         });
 
         socket.on('phrase', function (data) {
             socket.player.phrase = data;
             console.log(socket.player.phrase);
             console.log(socket.player);
-            io.emit('phrase', socket.player);
+            io.sockets.in(roomname).emit('phrase', socket.player);
         });
 
-        socket.on('1compare', function (data) {
-            console.log("server receives for compare");
-            httpServer.p1data = data;
-            if (httpServer.p2data) {
-                if (httpServer.p1data.word == httpServer.p2data.word) {
-                    console.log("word match");
-                    var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
-                    var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
-                    if (size1 >= 0 && size2 >= 0) {
-                        console.log("word length acceptable");
-                        if (httpServer.p1data.page == httpServer.p2data.page) {
-                            if (size1 == size2) {
-                                console.log("sizes equal");
-                                for (var i = 0; i <= size1; i++) {
-                                    if (httpServer.p1data.phrase[i] != "" && httpServer.p2data.phrase[i] != "") {
-                                        if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                            console.log("no match" + httpServer.p1data.phrase[i] + " " + httpServer.p2data.phrase[i]);
-                                            return;
-                                        }
-                                        if (i == size1) {
-                                            console.log("content the same");
-                                            compareSimilarity();
-                                        }
-
-                                    }
-                                }
-
-                            } else {
-                                console.log("no match, sizes not equal");
-                            }
-                        } else {
-                            console.log("not on same page");
-                        }
-                    } else {
-                        console.log("no match, sizes not greater than or equal to 0");
-                    }
+        socket.on('onPlayerforCompare', function (data) {
+            console.log(data.phrase);
+            if (httpServer.roomArray[data.room] == undefined) {
+                httpServer.roomArray[data.room] = new Room();
+                if (data.id == 1) {
+                    httpServer.roomArray[data.room].player1 = new Player(data);
+                }
+                if (data.id == 2) {
+                    httpServer.roomArray[data.room].player2 = new Player(data);
                 }
             }
+            if (httpServer.roomArray[data.room] != undefined) {
+                if (data.id == 1) {
+                    httpServer.roomArray[data.room].player1 = new Player(data);
+                }
+                if (data.id == 2) {
+                    httpServer.roomArray[data.room].player2 = new Player(data);
+                }
+            }
+            Compare1(data);
         });
 
-        socket.on('2compare', function (data) {
-            httpServer.p2data = data;
-            if (httpServer.p1data) {
-                if (httpServer.p2data.word == httpServer.p1data.word) {
-                    console.log("word match");
-
-                    var size1 = Object.keys(httpServer.p1data.phrase).length - 1;
-                    var size2 = Object.keys(httpServer.p2data.phrase).length - 1;
-                    if (size1 >= 0 && size2 >= 0) {
-                        console.log("word length acceptable");
-                        if (httpServer.p1data.page == httpServer.p2data.page) {
-                            if (size1 == size2) {
-                                console.log("sizes equal");
-                                for (var i = 0; i <= size1; i++) {
-                                    if (httpServer.p1data.phrase[i] != "" && httpServer.p2data.phrase[i] != "") {
-                                        if (httpServer.p1data.phrase[i] != httpServer.p2data.phrase[i]) {
-                                            console.log("no match" + httpServer.p2data.phrase[i] + " " + httpServer.p1data.phrase[i]);
-                                            return;
-                                        }
-                                        if (i == size1) {
-                                            console.log("content the same");
-                                            compareSimilarity();
-                                        }
-                                    }
-                                }
-
-                            } else {
-                                console.log("no match, sizes not equal");
-                            }
-                        } else {
-                            console.log("not on same page");
-                        }
-                    } else {
-                        console.log("no match, sizes not greater than or equal to 0");
-                    }
-                }
-            }
-
+        socket.on('othercheckbox', function (data) {
+            console.log("server receives for othercheckbox");
+            socket.broadcast.to(roomname).emit('othercheckbox', data);
         });
 
         socket.on('dictionaryopen', function () {
-            io.emit('dictionaryopen', socket.player.id);
+            io.sockets.in(roomname).emit('dictionaryopen', socket.player.id);
         });
 
         socket.on('dictionaryclose', function () {
-            console.log("server receives request to close dictionary");
-            io.emit('dictionaryclose', socket.player.id);
+            io.sockets.in(roomname).emit('dictionaryclose', socket.player.id);
         });
 
         socket.on('endspeech', function () {
-            io.emit('endspeech');
+            io.sockets.in(roomname).emit('endspeech');
         });
 
         socket.on('disconnect', function () {
             if (socket.player) {
-                io.emit('remove', socket.player.id);
+                io.sockets.in(roomname).emit('remove', socket.player.id);
             }
         });
     });
 });
 
-function compareSimilarity() {
-    if (!isEmpty(httpServer.definitions)) {
-        console.log("contains definitions");
-        var defsize = Object.keys(httpServer.definitions).length - 1;
+
+function Room() {
+    this.player1;
+    this.player2;
+    this.definitions = {};
+    this.definitionindex = 0;
+}
+
+function Player(data) {
+    this.phrase = data.phrase;
+    this.page = data.page;
+    this.word = data.word;
+    this.room = data.room;
+}
+
+function Compare1(data) {
+    if (httpServer.roomArray[data.room].player1) {
+        var p1data = httpServer.roomArray[data.room].player1
+    }
+    if (httpServer.roomArray[data.room].player2) {
+        var p2data = httpServer.roomArray[data.room].player2
+    }
+    if (p1data && p2data) {
+
+        if (p1data.word == p2data.word) {
+            console.log("word match");
+            console.log(p1data.phrase);
+            console.log(p2data.phrase);
+            var size1 = Object.keys(p1data.phrase).length - 1;
+            var size2 = Object.keys(p2data.phrase).length - 1;
+            if (size1 >= 0 && size2 >= 0) {
+                console.log("word length acceptable");
+                if (p1data.page == p2data.page) {
+                    if (size1 == size2) {
+                        console.log("sizes equal");
+                        for (var i = 0; i <= size1; i++) {
+                            if (p1data.phrase[i] != "" && p2data.phrase[i] != "") {
+                                if (p1data.phrase[i] != p2data.phrase[i]) {
+                                    console.log("no match" + p1data.phrase[i] + " " + p2data.phrase[i]);
+                                    return;
+                                }
+                                if (i == size1) {
+                                    console.log("content the same");
+                                    console.log(p2data.phrase);
+                                    compare2(p1data, p2data, httpServer.roomArray[data.room]);
+                                }
+
+                            }
+                        }
+
+                    } else {
+                        console.log("no match, sizes not equal");
+                    }
+                } else {
+                    console.log("not on same page");
+                }
+            } else {
+                console.log("no match, sizes not greater than or equal to 0");
+            }
+        }
+    }
+
+};
+
+function compare2(p1data, p2data, roomobject) {
+    if (!isEmpty(roomobject.definitions)) {
+        var defsize = Object.keys(roomobject.definitions).length - 1;
         console.log(defsize);
         for (var i = 0; i <= defsize; i++) {
-            console.log("definition" + httpServer.definitions[i].phrase);
-            console.log("phrase " + httpServer.p1data.phrase);
+            console.log("definition" + roomobject.definitions[i].phrase);
+            console.log("phrase " + p1data.phrase);
             console.log("for loop to check repeat working..");
-            if (httpServer.definitions[i].phrase.toString() == httpServer.p1data.phrase.toString()) {
+            if (roomobject.definitions[i].phrase.toString() == p1data.phrase.toString()) {
                 console.log("This phrase is already taken");
                 return;
             }
             if (i == defsize) {
                 console.log("matching phrases");
-                httpServer.definitions[httpServer.definitionIndex] = {
-                    word: httpServer.p2data.word,
-                    phrase: httpServer.p2data.phrase,
-                    page: httpServer.p2data.phrase
+                roomobject.definitions[roomobject.definitionindex] = {
+                    word: p2data.word,
+                    phrase: p2data.phrase,
+                    page: p2data.phrase
                 };
-                httpServer.definitionIndex++;
-                console.log(httpServer.definitions);
-                io.emit("match", httpServer.p1data);
+                roomobject.definitionindex++;
+                console.log(roomobject.definitions);
+                io.sockets.in(p1data.room).emit("match", p1data);
             }
         }
     } else {
         console.log("contains no definitions");
         console.log("matching phrases");
-        httpServer.definitions[httpServer.definitionIndex] = {
-            word: httpServer.p2data.word,
-            phrase: httpServer.p2data.phrase,
-            page: httpServer.p2data.page
+        console.log(p2data.phrase);
+        roomobject.definitions[roomobject.definitionindex] = {
+            word: p2data.word,
+            phrase: p2data.phrase,
+            page: p2data.page
         };
-        httpServer.definitions[httpServer.definitionIndex];
-        httpServer.definitionIndex++;
-        console.log(httpServer.definitions);
-        io.emit("match", httpServer.p1data);
+        roomobject.definitionindex++;
+        console.log("room definitions " + roomobject.definitions[0]);
+        console.log(roomobject);
+        console.log("room index " + roomobject.definitionindex);
+        io.sockets.in(p1data.room).emit("match", p1data);
     }
 
 }
+
+
 
 function isEmpty(obj) {
     for (var key in obj) {
@@ -236,14 +258,16 @@ function isEmpty(obj) {
 }
 
 
-function getAllPlayers() {
+function getAllPlayers(room) {
     var collectedPlayers = [];
-    Object.keys(io.sockets.connected).forEach(function (socketID) {
-        var currentPlayer = io.sockets.connected[socketID].player;
-        if (currentPlayer != null) {
-            collectedPlayers.push(currentPlayer);
-        }
+    console.log(Object.keys(io.nsps['/'].adapter.rooms[room].sockets));
+    Object.keys(io.nsps['/'].adapter.rooms[room].sockets).forEach(function (socketID) {
+        var player = io.sockets.adapter.nsp.connected[socketID].player;
+        if (player != null) {
+            collectedPlayers.push(player);
+        };
     });
+    console.log(collectedPlayers);
     return collectedPlayers;
 }
 

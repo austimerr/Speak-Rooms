@@ -17,6 +17,7 @@ var flip5 = true;
 var flip6 = true;
 var flip7 = false;
 var flip8 = true;
+var flip9 = true;
 
 var dictionaryOpen = false;
 
@@ -155,7 +156,6 @@ mainGameState.create = function () {
     };
 
     //UI FUNCTION
-    Client.askNewPlayer();
 
     mainGameState.populateSymbols();
     mainGameState.populateDictionary();
@@ -172,6 +172,13 @@ mainGameState.create = function () {
     mainGameState.text.fontWeight = 'bold';
     mainGameState.text.fill = '#000000';
 };
+
+mainGameState.requestNewPlayer = function () {
+    if (flip9) {
+        Client.askNewPlayer();
+        flip9 = false;
+    }
+}
 
 mainGameState.clickRequest = function (sprite, pointer) {
     if (pointer.rightButton.isDown) {
@@ -302,16 +309,16 @@ mainGameState.populateDictionary = function () {
     for (var i = 0; i <= dictionaryarray.length - 1; i++) {
         //Page 1
         if (i <= 7) {
-            console.log("page 1 populated");
+
             if (i % 2 == 0) {
-                console.log("page 1 even entry " + dictionaryentry + i);
+
                 var dictionaryentry = mainGameState.Page1.addChild(game.add.text(100, ((i * 50) + 300), dictionaryarray[i], {
                     font: '28px Georgia',
                     fill: '#000000',
                     align: 'left'
                 }));
             } else if (Math.abs(i % 2) == 1) {
-                console.log("page 1 odd entry " + dictionaryentry + i);
+
                 var dictionaryentry = mainGameState.Page1.addChild(game.add.text(450, ((i * 50) + 250), dictionaryarray[i], {
                     font: '28px Georgia',
                     fill: '#000000',
@@ -320,16 +327,15 @@ mainGameState.populateDictionary = function () {
             }
             //Page 2
         } else if (i > 7 && i <= 15) {
-            console.log("page 2 populated");
+
             if (i % 2 == 0) {
-                console.log("page 2 even entry " + dictionaryentry + i);
                 dictionaryentry = mainGameState.Page2.addChild(game.add.text(100, ((i * 50) - 100), dictionaryarray[i], {
                     font: '28px Georgia',
                     fill: '#000000',
                     align: 'left'
                 }));
             } else if (Math.abs(i % 2) == 1) {
-                console.log("page 2 odd entry " + dictionaryentry + i);
+
                 dictionaryentry = mainGameState.Page2.addChild(game.add.text(450, ((i * 50) - 150), dictionaryarray[i], {
                     font: '28px Georgia',
                     fill: '#000000',
@@ -338,7 +344,7 @@ mainGameState.populateDictionary = function () {
             }
             //Page 3
         } else if (i > 15 && i <= 23) {
-            console.log("page 3 populated");
+
             if (i % 2 == 0) {
                 dictionaryentry = mainGameState.Page3.addChild(game.add.text(100, ((i * 50) - 500), dictionaryarray[i], {
                     font: '28px Georgia',
@@ -354,7 +360,7 @@ mainGameState.populateDictionary = function () {
             }
             //Page 4
         } else if (i > 23 && i <= 32) {
-            console.log("page 4 populated");
+
             if (i % 2 == 0) {
                 dictionaryentry = mainGameState.Page4.addChild(game.add.text(100, ((i * 50) - 900), dictionaryarray[i], {
                     font: '28px Georgia',
@@ -382,12 +388,17 @@ mainGameState.populateDictionary = function () {
         check.anchor.setTo(0.5, 0.5);
         check.visible = false;
 
-
+        var otherCheck = checkbox.addChild(game.make.sprite(5, -40, 'check'));
+        otherCheck.anchor.setTo(0.5, 0.5);
+        otherCheck.visible = false;
+        otherCheck.alpha = .7;
+        otherCheck.scale.setTo(0.5, 0.5);
     }
 }
 
 
 mainGameState.addNewPlayer = function (id, x, y) {
+    console.log("adding new player" + id + " in game.");
     if (mainGameState.text) {
         mainGameState.text.visible = false;
     }
@@ -539,6 +550,8 @@ mainGameState.update = function () {
             mainGameState.dictionaryCloseRequest();
         }
     }
+
+    console.log(myPlayerID);
 }
 
 mainGameState.playerIndicator = function () {
@@ -821,6 +834,11 @@ mainGameState.OnDefineDown = function (touchedbutton) {
                             phrase: mainGameState.phrasetoCompare,
                             word: i
                         });
+                        Client.otherCheckBox({
+                            page: mainGameState.activePage.key,
+                            word: i,
+                            active: true
+                        });
                         return;
                     } else if (!touchedbutton.children[0].visible) {
                         Client.sendForCompare({
@@ -828,6 +846,11 @@ mainGameState.OnDefineDown = function (touchedbutton) {
                             page: mainGameState.activePage.key,
                             phrase: "",
                             word: i
+                        });
+                        Client.otherCheckBox({
+                            page: mainGameState.activePage.key,
+                            word: i,
+                            active: false
                         });
                         return;
                     }
@@ -863,10 +886,16 @@ mainGameState.OnDefineDown = function (touchedbutton) {
 
                 }
 
-                //TURNS OFF CHECKMARK IF YOU CHANGE INPUT
                 for (i = 0; i <= mainGameState.activePage.children.length - 1; i++) {
                     if (touchedbutton == mainGameState.activePage.children[i].children[0]) {
-                        mainGameState.activePage.children[i].children[1].children[0].visible = false;
+                        if (mainGameState.activePage.children[i].children[1].children[0].visible) {
+                            Client.sendForCompare({
+                                id: myPlayerID,
+                                page: mainGameState.activePage.key,
+                                phrase: mainGameState.phrasetoCompare,
+                                word: i
+                            });
+                        }
                     }
                 }
             }
@@ -874,6 +903,20 @@ mainGameState.OnDefineDown = function (touchedbutton) {
         flip5 = false;
 
     }
+}
+
+mainGameState.otherCheck = function (page, word, check) {
+    if (page == "page1") {
+        active = mainGameState.Page1;
+    } else if (page == "page2") {
+        active = mainGameState.Page2;
+    } else if (page == "page3") {
+        active = mainGameState.Page3;
+    } else if (page == "page4") {
+        active = mainGameState.Page4;
+    }
+    active.children[word].children[1].children[1].visible = check;
+
 }
 
 
@@ -895,6 +938,7 @@ mainGameState.match = function (word, phrase, page) {
     active.children[word].children[1].visible = false;
     if (play == true) {
         mainGameState.successSound.play();
+        mainGameState.successSound.volume = .5;
         play = false;
     }
 }
@@ -1006,7 +1050,7 @@ mainGameState.OnPlayerDown = function () {
         //REMOVES THE PREVIOUS MESSAGE BEING SAID BY PLAYER SPRITE
         if (((mainGameState.symbols.children.length - 1) - mainGameState.symbollength) != 0) {
             for (var i = mainGameState.symbols.children.length - 1; i > mainGameState.symbollength; i--) {
-                mainGameState.symbols.children[i].destroy();
+                // mainGameState.symbols.children[i].destroy();
             }
         }
 
@@ -1026,8 +1070,8 @@ mainGameState.OnPlayerDown = function () {
         Client.sendPhrase(mainGameState.phrase);
 
         //RESETS PHRASE 
-        mainGameState.word = 0;
-        mainGameState.phrase = [];
+        //        mainGameState.word = 0;
+        //        mainGameState.phrase = [];
         flip3 = false;
     }
 
