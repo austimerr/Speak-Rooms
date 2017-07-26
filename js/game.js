@@ -36,7 +36,7 @@ var game = new Phaser.Game(
 var mainGameState = {};
 
 mainGameState.preload = function () {
-    game.load.image('background', 'assets/background.png');
+    game.load.image('background', 'assets/backgroundlarge.png');
     game.load.image('testbackground', 'assets/background2.png');
 
     game.load.spritesheet('player1', 'assets/redspritesheet.png', 49, 66);
@@ -103,7 +103,7 @@ mainGameState.create = function () {
     this.playerList = {};
     mainGameState.phrasetoCompare = [];
 
-    game.world.setBounds(0, 0, 1600, 1600);
+    game.world.setBounds(0, 0, 2400, 2400);
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -111,7 +111,7 @@ mainGameState.create = function () {
         e.preventDefault();
     }
 
-    var background = game.add.sprite(0, 0, 'testbackground');
+    var background = game.add.sprite(0, 0, 'background');
     background.inputEnabled = true;
     background.smoothed = false;
     background.scale.setTo(4, 4);
@@ -234,14 +234,18 @@ mainGameState.populateSymbols = function () {
     mainGameState.open.smoothed = false;
 
     mainGameState.space = mainGameState.symbols.addChild(game.make.sprite(5, 360, 'space'));
+    mainGameState.spacebarposition = mainGameState.space.x;
     mainGameState.space.inputEnabled = true;
     mainGameState.space.smoothed = false;
 
     mainGameState.clear = mainGameState.symbols.addChild(game.make.sprite(82.5, 360, 'clear'));
+    mainGameState.clearposition = mainGameState.clear.x;
     mainGameState.clear.inputEnabled = true;
     mainGameState.clear.smoothed = false;
 
     var symbolarray = ['symbol1', 'symbol2', 'symbol3', 'symbol4', 'symbol5', 'symbol6', 'symbol7', 'symbol8']
+    mainGameState.leftsymbolposition = 0;
+    mainGameState.rightsymbolposition = 70;
 
     for (var i = 0; i <= symbolarray.length - 1; i++) {
         if (i % 2 == 0) {
@@ -307,7 +311,7 @@ mainGameState.populateDictionary = function () {
     //WHEN YOU WANT TO SEARCH THROUGH THE ACTUAL DEFINED WORDS START WITH I = 2 (INDEX OF GREEN IN CHILDREN)
 
     //Array featuring all words
-    var dictionaryarray = ['Yes: ', 'No: ', 'Follow: ', 'Watch: ', 'Listen: ', 'And: ', '?: ', 'Check: ',
+    var dictionaryarray = ['Yes: ', 'No: ', 'Follow: ', 'Watch: ', 'Listen: ', 'And: ', '?: ', 'Dictionary: ',
                            'Blue: ', 'Red: ', 'Circle: ', 'Square: ', 'Blue\nPlayer: ', 'Red\nPlayer: ', 'Purple: ', 'Shapes: ',
                            'Page3: ', 'Mean: ', 'Friendly: ', 'Bumpy: ', 'Smooth: ', 'Pointy: ', 'Round: ', 'Throw: ',
                            'Page4: ', 'Eat: ', 'Dangerous: ', 'Helpful: ', 'Monster: ', 'Animal: ', 'Goal: ', 'Team: '];
@@ -884,37 +888,71 @@ mainGameState.OnDefineDown = function (touchedbutton) {
                 //FILLS OUT CHILDREN ARRAY OF SYMBOLSPACE YOU HIT BASED ON CURRENT PHRASE IN SYMBOL MENU
                 for (var i = 0; i <= Object.keys(mainGameState.phrase).length - 1; i++) {
                     //input of symbols needs to only be allowed when checkbox is visible 
-                    if (mainGameState.phrase[i] != 'spaceSymbol') {
-                        var symbolInBlank = touchedbutton.addChild(game.make.sprite((((i + mainGameState.decreaseIndex) * 25) - 65), 0, mainGameState.phrase[i]));
-                        mainGameState.phrasetoCompare[i + mainGameState.decreaseIndex] = mainGameState.phrase[i];
+                    if (touchedbutton.children[i - 1]) {
+                        if (mainGameState.phrase[i - 1] != 'spaceSymbol' && mainGameState.phrase[i] != 'spaceSymbol') {
+                            var n = touchedbutton.children[i - 1].x;
+                            var symbolInBlank = touchedbutton.addChild(game.make.sprite((n + 25), 0, mainGameState.phrase[i]));
+                            symbolInBlank.scale.setTo(.25, .25);
+                            mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
+                            symbolInBlank.anchor.setTo(0.5, 0.5);
+                            symbolInBlank.scale.setTo(0.4, 0.4);
+                            console.log("nonspace placed after nonspace");
+                        } else if (mainGameState.phrase[i - 1] == 'spaceSymbol' && mainGameState.phrase[i] != 'spaceSymbol') {
+                            var n = touchedbutton.children[i - 1].x;
+                            var symbolInBlank = touchedbutton.addChild(game.make.sprite((n + 15), 0, mainGameState.phrase[i]));
+                            symbolInBlank.scale.setTo(.25, .25);
+                            mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
+                            symbolInBlank.anchor.setTo(0.5, 0.5);
+                            symbolInBlank.scale.setTo(0.4, 0.4);
+                            console.log("nonspace placed after space");
+                        }
+                        if (mainGameState.phrase[i - 1] == 'spaceSymbol' && mainGameState.phrase[i] == 'spaceSymbol') {
+                            var n = touchedbutton.children[i - 1].x;
+                            var symbolInBlank = touchedbutton.addChild(game.make.sprite((n + 10), 0, mainGameState.phrase[i]));
+                            symbolInBlank.scale.setTo(.25, .25);
+                            mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
+                            symbolInBlank.anchor.setTo(0.5, 0.5);
+                            symbolInBlank.scale.setTo(0.4, 0.4);
+                            console.log("space placed after space");
+                        } else if (mainGameState.phrase[i - 1] != 'spaceSymbol' && mainGameState.phrase[i] == 'spaceSymbol') {
+                            var n = touchedbutton.children[i - 1].x;
+                            var symbolInBlank = touchedbutton.addChild(game.make.sprite((n + 15), 0, mainGameState.phrase[i]));
+                            symbolInBlank.scale.setTo(.25, .25);
+                            mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
+                            symbolInBlank.anchor.setTo(0.5, 0.5);
+                            symbolInBlank.scale.setTo(0.4, 0.4);
+                            console.log("space placed after nonspace");
+                        }
+
+                    } else {
+                        var symbolInBlank = touchedbutton.addChild(game.make.sprite(((i * 25) - 65), 0, mainGameState.phrase[i]));
+                        symbolInBlank.scale.setTo(.25, .25);
+                        mainGameState.phrasetoCompare[i] = mainGameState.phrase[i];
                         symbolInBlank.anchor.setTo(0.5, 0.5);
                         symbolInBlank.scale.setTo(0.4, 0.4);
+                        console.log("first symbol placed");
+
                     }
-
-
-                    if (mainGameState.phrase[i] == 'spaceSymbol') {
-                        mainGameState.decreaseIndex--;
-                    }
-
                 }
 
-                for (i = 0; i <= mainGameState.activePage.children.length - 1; i++) {
-                    if (touchedbutton == mainGameState.activePage.children[i].children[0]) {
-                        if (mainGameState.activePage.children[i].children[1].children[0].visible) {
-                            Client.sendForCompare({
-                                id: myPlayerID,
-                                page: mainGameState.activePage.key,
-                                phrase: mainGameState.phrasetoCompare,
-                                word: i
-                            });
-                        }
+            }
+
+            for (i = 0; i <= mainGameState.activePage.children.length - 1; i++) {
+                if (touchedbutton == mainGameState.activePage.children[i].children[0]) {
+                    if (mainGameState.activePage.children[i].children[1].children[0].visible) {
+                        Client.sendForCompare({
+                            id: myPlayerID,
+                            page: mainGameState.activePage.key,
+                            phrase: mainGameState.phrasetoCompare,
+                            word: i
+                        });
                     }
                 }
             }
         }
-        flip5 = false;
-
     }
+    flip5 = false;
+
 }
 
 mainGameState.otherCheck = function (page, word, check) {
@@ -962,12 +1000,9 @@ mainGameState.OnSymbolDown = function (touchedbutton) {
 
         //ANIMATES THE SYMBOL YOU CLICKED AND ADDS THE KEY OF SAID SYMBOL TO AN OBJECT CALLED PHRASE 
         if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel' && touchedbutton.key != 'clear' && touchedbutton.key != 'space') {
-            game.add.tween(touchedbutton).to({
-                x: touchedbutton.x - 5
-            }, 20, Phaser.Easing.Bounce.Out, true);
-
             //SHOWS THE SYMBOLS YOU ARE TYPING IN THE SYMBOL MENU AS YOU TYPE
             if (mainGameState.symbols.children[mainGameState.symbols.children.length - 1].x < 110) {
+                touchedbutton.visible = false;
                 mainGameState.phrase[mainGameState.word] = touchedbutton.key;
                 mainGameState.word++;
                 var typedsprite = mainGameState.symbols.addChild(game.make.sprite(0, 310, touchedbutton.key));
@@ -994,9 +1029,7 @@ mainGameState.OnSymbolDown = function (touchedbutton) {
             touchedbutton.visible = false;
             mainGameState.expandDictionary();
         } else if (touchedbutton.key == 'space') {
-            game.add.tween(touchedbutton).to({
-                x: touchedbutton.x - 5
-            }, 20, Phaser.Easing.Bounce.Out, true);
+            touchedbutton.visible = false;
             if (mainGameState.symbols.children[mainGameState.symbols.children.length - 1].x < 125) {
                 mainGameState.phrase[mainGameState.word] = 'spaceSymbol';
                 mainGameState.word++;
@@ -1015,9 +1048,7 @@ mainGameState.OnSymbolDown = function (touchedbutton) {
 
             }
         } else if (touchedbutton.key == 'clear') {
-            game.add.tween(touchedbutton).to({
-                x: touchedbutton.x - 5
-            }, 20, Phaser.Easing.Bounce.Out, true);
+            touchedbutton.visible = false;
             mainGameState.Clear(touchedbutton);
         }
         flip2 = false;
@@ -1027,13 +1058,6 @@ mainGameState.OnSymbolDown = function (touchedbutton) {
 
 mainGameState.OnSymbolUp = function (touchedbutton) {
     touchedbutton.visible = true;
-
-    //RETURNS THE SYMBOLS TO THEIR ORIGINAL POSITION FOR FEEDBACK
-    if (touchedbutton.key != 'open' && touchedbutton.key != 'dictionarylabel') {
-        game.add.tween(touchedbutton).to({
-            x: touchedbutton.x + 5
-        }, 20, Phaser.Easing.Linear.Out, true);
-    }
     flip2 = true;
     flip6 = true;
 }
@@ -1145,33 +1169,33 @@ mainGameState.sayPhrase = function (id, phrase) {
         if (mainGameState.playerList[id].children[0].children[mainGameState.playerList[id].children[0].children.length - 1]) {
             if (mainGameState.playerList[id].children[0].children[mainGameState.playerList[id].children[0].children.length - 1].x < 1000) {
                 console.log("for loop activated");
-                if (mainGameState.phrase[i - 1] != 'spaceSymbol' && mainGameState.phrase[i] != 'spaceSymbol') {
+                if (phrase[i - 1] != 'spaceSymbol' && phrase[i] != 'spaceSymbol') {
                     var n = mainGameState.playerList[id].children[0].children[i - 1].x;
-                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 12.5, -17, mainGameState.phrase[i]));
+                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 12.5, -17, phrase[i]));
                     symbolSprite.scale.setTo(.25, .25);
                     console.log("nonspace placed after nonspace");
-                } else if (mainGameState.phrase[i - 1] == 'spaceSymbol' && mainGameState.phrase[i] != 'spaceSymbol') {
+                } else if (phrase[i - 1] == 'spaceSymbol' && phrase[i] != 'spaceSymbol') {
                     var n = mainGameState.playerList[id].children[0].children[i - 1].x;
-                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 2, -17, mainGameState.phrase[i]));
+                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 2, -17, phrase[i]));
                     symbolSprite.scale.setTo(.25, .25);
                     console.log("nonspace placed after space");
                 }
 
 
-                if (mainGameState.phrase[i - 1] == 'spaceSymbol' && mainGameState.phrase[i] == 'spaceSymbol') {
+                if (phrase[i - 1] == 'spaceSymbol' && phrase[i] == 'spaceSymbol') {
                     var n = mainGameState.playerList[id].children[0].children[i - 1].x;
-                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 2, -17, mainGameState.phrase[i]));
+                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 2, -17, phrase[i]));
                     symbolSprite.scale.setTo(.25, .25);
                     console.log("space placed after space");
-                } else if (mainGameState.phrase[i - 1] != 'spaceSymbol' && mainGameState.phrase[i] == 'spaceSymbol') {
+                } else if (phrase[i - 1] != 'spaceSymbol' && phrase[i] == 'spaceSymbol') {
                     var n = mainGameState.playerList[id].children[0].children[i - 1].x;
-                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 15, -17, mainGameState.phrase[i]));
+                    var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite(n + 15, -17, phrase[i]));
                     symbolSprite.scale.setTo(.25, .25);
                     console.log("space placed after nonspace");
                 }
             }
         } else {
-            var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite((i * 17) - 47, -17, mainGameState.phrase[i]));
+            var symbolSprite = mainGameState.playerList[id].children[0].addChild(game.make.sprite((i * 17) - 47, -17, phrase[i]));
             symbolSprite.scale.setTo(.25, .25);
             console.log("symbol placed");
         }

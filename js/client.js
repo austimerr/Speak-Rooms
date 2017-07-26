@@ -72,8 +72,9 @@ Client.socket.on('yourRoomNum', function (data) {
 });
 
 Client.socket.on('newplayer', function (data) {
-    console.log('new player called in client with id of: ' + data.id);
-    mainGameState.addNewPlayer(data.id, data.x, data.y);
+    if (data.id) {
+        mainGameState.addNewPlayer(data.id, data.x, data.y)
+    }
 });
 
 
