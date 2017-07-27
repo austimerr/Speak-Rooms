@@ -163,16 +163,14 @@ mainGameState.create = function () {
     mainGameState.populateDictionary();
 
     //TEXT TO BE SEEN WHEN A PLAYER IS UNABLE TO PLAY
+    mainGameState.roomtext = game.add.text(550, 50, 'Room Number: ');
+    mainGameState.roomtext.anchor.setTo(0, 0);
+    mainGameState.roomtext.align = "center";
+    mainGameState.roomtext.fixedToCamera = true;
+    mainGameState.roomtext.font = 'Arial Black';
+    mainGameState.roomtext.fontSize = 20;
+    mainGameState.roomtext.fill = '#000000';
 
-    mainGameState.text = game.add.text(150, 300, ' Sorry, this room\nis full.');
-    mainGameState.text.anchor.setTo(0, 0);
-    mainGameState.text.align = "center";
-    mainGameState.text.fixedToCamera = true;
-
-    mainGameState.text.font = 'Arial Black';
-    mainGameState.text.fontSize = 50;
-    mainGameState.text.fontWeight = 'bold';
-    mainGameState.text.fill = '#000000';
 };
 
 mainGameState.requestNewPlayer = function () {
@@ -182,9 +180,13 @@ mainGameState.requestNewPlayer = function () {
     }
 }
 
+mainGameState.roomNumberText = function (room) {
+    console.log("your room in game" + room);
+    mainGameState.roomtext.setText('Room Number: ' + room);
+}
+
 mainGameState.clickRequest = function (sprite, pointer) {
     if (pointer.rightButton.isDown) {
-        console.log("right button hit");
         Client.clickRequest({
             id: myPlayerID,
             x: pointer.positionDown.x + game.camera.x,
@@ -194,7 +196,6 @@ mainGameState.clickRequest = function (sprite, pointer) {
 }
 
 mainGameState.click = function (id, x, y) {
-    console.log("message returned to game");
     if (id == 1) {
         if (mainGameState.pointer1) {
             mainGameState.pointer1.destroy();
@@ -408,84 +409,83 @@ mainGameState.populateDictionary = function () {
 
 
 mainGameState.addNewPlayer = function (id, x, y) {
-    console.log("adding new player" + id + " in game.");
-    if (mainGameState.text) {
-        mainGameState.text.visible = false;
+    if (id) {
+        console.log("adding new player" + id + " in game.");
+        // --- Player Initialization ---
+        if (id == 1) {
+            mainGameState.playerList[id] = game.add.sprite(x, y, 'player1');
+            mainGameState.playerList[id].animations.add('forward', [0], 8, true);
+            mainGameState.playerList[id].animations.add('forwardRight', [1], 8, true);
+            mainGameState.playerList[id].animations.add('right', [2], 8, true);
+            mainGameState.playerList[id].animations.add('backRight', [3], 8, true);
+            mainGameState.playerList[id].animations.add('back', [4], 8, true);
+            mainGameState.playerList[id].animations.add('backLeft', [5], 8, true);
+            mainGameState.playerList[id].animations.add('left', [6], 8, true);
+            mainGameState.playerList[id].animations.add('forwardLeft', [7], 8, true);
+            mainGameState.player1x = mainGameState.playerList[id].x;
+            mainGameState.player1y = mainGameState.playerList[id].y;
+        } else if (id == 2) {
+            mainGameState.playerList[id] = game.add.sprite(x, y, 'player2');
+            mainGameState.playerList[id].animations.add('forward', [0], 8, true);
+            mainGameState.playerList[id].animations.add('forwardRight', [1], 8, true);
+            mainGameState.playerList[id].animations.add('right', [2], 8, true);
+            mainGameState.playerList[id].animations.add('backRight', [3], 8, true);
+            mainGameState.playerList[id].animations.add('back', [4], 8, true);
+            mainGameState.playerList[id].animations.add('backLeft', [5], 8, true);
+            mainGameState.playerList[id].animations.add('left', [6], 8, true);
+            mainGameState.playerList[id].animations.add('forwardLeft', [7], 8, true);
+            mainGameState.player2x = mainGameState.playerList[id].x;
+            mainGameState.player2y = mainGameState.playerList[id].y;
+        }
+        mainGameState.playerList[id].anchor.setTo(.5, .5);
+        mainGameState.playerList[id].scale.setTo(2, 2);
+        mainGameState.playerList[id].smoothed = false;
+        game.physics.arcade.enable(mainGameState.playerList[id]);
+        mainGameState.playerList[id].body.collideWorldBounds = true;
+        mainGameState.playerList[id].inputEnabled = true;
+
+        //PROPERLY LAYERS PLAYERS ON THE Z AXIS
+        game.world.swap(mainGameState.playerList[id], mainGameState.symbols);
+
+        if (id == 2) {
+            game.world.swap(mainGameState.playerList[id], mainGameState.dictionary);
+        }
+
+        //SETS UP THE SPEECH BUBBLES FOR PLAYER 2
+        mainGameState.playerList[id].addChild(game.make.sprite(0, -45, 'bubble2'));
+        mainGameState.playerList[id].children[0].visible = false;
+        mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
+
+        if (id == 1) {
+            var eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redhappy'));
+            eye.visible = false;
+            eye.smoothed = false;
+            eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redconfused'));
+            eye.visible = false;
+            eye.smoothed = false;
+            eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redmad'));
+            eye.visible = false;
+            eye.smoothed = false;
+            eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redscared'));
+            eye.visible = false;
+            eye.smoothed = false;
+        } else if (id == 2) {
+            var eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluehappy'));
+            eye.visible = false;
+            eye.smoothed = false;
+            eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'blueconfused'));
+            eye.visible = false;
+            eye.smoothed = false;
+            eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluemad'));
+            eye.visible = false;
+            eye.smoothed = false;
+            eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluescared'));
+            eye.visible = false;
+            eye.smoothed = false;
+        }
+
+        game.camera.follow(mainGameState.playerList[myPlayerID]);
     }
-    // --- Player Initialization ---
-    if (id == 1) {
-        mainGameState.playerList[id] = game.add.sprite(x, y, 'player1');
-        mainGameState.playerList[id].animations.add('forward', [0], 8, true);
-        mainGameState.playerList[id].animations.add('forwardRight', [1], 8, true);
-        mainGameState.playerList[id].animations.add('right', [2], 8, true);
-        mainGameState.playerList[id].animations.add('backRight', [3], 8, true);
-        mainGameState.playerList[id].animations.add('back', [4], 8, true);
-        mainGameState.playerList[id].animations.add('backLeft', [5], 8, true);
-        mainGameState.playerList[id].animations.add('left', [6], 8, true);
-        mainGameState.playerList[id].animations.add('forwardLeft', [7], 8, true);
-        mainGameState.player1x = mainGameState.playerList[id].x;
-        mainGameState.player1y = mainGameState.playerList[id].y;
-    } else if (id == 2) {
-        mainGameState.playerList[id] = game.add.sprite(x, y, 'player2');
-        mainGameState.playerList[id].animations.add('forward', [0], 8, true);
-        mainGameState.playerList[id].animations.add('forwardRight', [1], 8, true);
-        mainGameState.playerList[id].animations.add('right', [2], 8, true);
-        mainGameState.playerList[id].animations.add('backRight', [3], 8, true);
-        mainGameState.playerList[id].animations.add('back', [4], 8, true);
-        mainGameState.playerList[id].animations.add('backLeft', [5], 8, true);
-        mainGameState.playerList[id].animations.add('left', [6], 8, true);
-        mainGameState.playerList[id].animations.add('forwardLeft', [7], 8, true);
-        mainGameState.player2x = mainGameState.playerList[id].x;
-        mainGameState.player2y = mainGameState.playerList[id].y;
-    }
-    mainGameState.playerList[id].anchor.setTo(.5, .5);
-    mainGameState.playerList[id].scale.setTo(2, 2);
-    mainGameState.playerList[id].smoothed = false;
-    game.physics.arcade.enable(mainGameState.playerList[id]);
-    mainGameState.playerList[id].body.collideWorldBounds = true;
-    mainGameState.playerList[id].inputEnabled = true;
-
-    //PROPERLY LAYERS PLAYERS ON THE Z AXIS
-    game.world.swap(mainGameState.playerList[id], mainGameState.symbols);
-
-    if (id == 2) {
-        game.world.swap(mainGameState.playerList[id], mainGameState.dictionary);
-    }
-
-    //SETS UP THE SPEECH BUBBLES FOR PLAYER 2
-    mainGameState.playerList[id].addChild(game.make.sprite(0, -45, 'bubble2'));
-    mainGameState.playerList[id].children[0].visible = false;
-    mainGameState.playerList[id].children[0].anchor.setTo(0.5, 0.5);
-
-    if (id == 1) {
-        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redhappy'));
-        eye.visible = false;
-        eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redconfused'));
-        eye.visible = false;
-        eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redmad'));
-        eye.visible = false;
-        eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-17.5, -31, 'redscared'));
-        eye.visible = false;
-        eye.smoothed = false;
-    } else if (id == 2) {
-        var eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluehappy'));
-        eye.visible = false;
-        eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'blueconfused'));
-        eye.visible = false;
-        eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluemad'));
-        eye.visible = false;
-        eye.smoothed = false;
-        eye = mainGameState.playerList[id].addChild(game.add.sprite(-14.5, -4.0, 'bluescared'));
-        eye.visible = false;
-        eye.smoothed = false;
-    }
-
-    game.camera.follow(mainGameState.playerList[myPlayerID]);
 };
 
 mainGameState.update = function () {

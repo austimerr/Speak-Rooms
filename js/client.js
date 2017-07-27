@@ -72,14 +72,13 @@ Client.socket.on('yourRoomNum', function (data) {
 });
 
 Client.socket.on('newplayer', function (data) {
-    if (data.id) {
-        mainGameState.addNewPlayer(data.id, data.x, data.y)
-    }
+    mainGameState.addNewPlayer(data.id, data.x, data.y)
 });
 
 
 Client.socket.on('allplayers', function (data) {
     console.log("all players request received in client");
+
     for (var i = 0; i < data.length; i++) {
         if (data[i].id) {
             mainGameState.addNewPlayer(data[i].id, data[i].x, data[i].y)
@@ -93,6 +92,7 @@ Client.socket.on('you', function (data) {
         console.log("congrats YOU are you");
         myID = data;
         mainGameState.setID(data);
+        mainGameState.roomNumberText(roomname);
     }
 });
 
