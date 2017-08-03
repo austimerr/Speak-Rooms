@@ -121,7 +121,8 @@ Client.socket.on('match', function (data) {
 });
 
 Client.socket.on('othercheckbox', function (data) {
-    mainGameState.otherCheck(data.page, data.word, data.active);
+    console.log("client receives other checkbox back from server");
+    mainGameState.otherCheck(data.page, data.active);
 });
 
 Client.socket.on('dictionaryopen', function (data) {
