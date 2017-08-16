@@ -8,6 +8,9 @@ var myID = -1;
 var Client = {};
 Client.socket = io.connect(address);
 
+Client.inMainGame = function () {
+    Client.socket.emit('inMainGame');
+}
 Client.askNewPlayer = function () {
     console.log("new player in " + roomname + " in client.");
     Client.socket.emit('newplayer', roomname);

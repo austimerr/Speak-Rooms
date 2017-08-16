@@ -32,12 +32,15 @@ httpServer.listen(8005, function () {
 });
 
 io.on('connection', function (socket) {
-    console.log("Connected!");
-    httpServer.totalPlayerCount++;
-    var n = httpServer.totalPlayerCount / 2
-    var roomnum = Math.ceil(n).toString();
-    socket.join(roomnum);
-    io.sockets.in(roomnum).emit('yourRoomNum', roomnum);
+
+    socket.on('inMainGame', function () {
+        console.log("Connected!");
+        httpServer.totalPlayerCount++;
+        var n = httpServer.totalPlayerCount / 2
+        var roomnum = Math.ceil(n).toString();
+        socket.join(roomnum);
+        io.sockets.in(roomnum).emit('yourRoomNum', roomnum);
+    });
 
 
     socket.on('newplayer', function (roomname) {
