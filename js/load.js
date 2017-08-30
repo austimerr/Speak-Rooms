@@ -14,6 +14,7 @@ var loadState = {
 
         game.load.image('background', 'assets/backgroundlarge.png');
         game.load.image('testbackground', 'assets/background2.png');
+        game.load.image('winscreen', 'assets/winscreen.png');
 
         game.load.spritesheet('player1', 'assets/redspritesheet.png', 49, 66);
         game.load.image('redmad', 'assets/redmad.png');

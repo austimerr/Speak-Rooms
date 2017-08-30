@@ -549,8 +549,22 @@ mainGameState.update = function () {
     }
 
     if (mainGameState.Matches == 16) {
-        console.log("you win!");
+        mainGameState.winState();
     }
+}
+
+mainGameState.winState = function () {
+    mainGameState.winScreen = game.add.sprite(0, 0, 'winscreen');
+    mainGameState.winScreen.fixedToCamera = true;
+
+    mainGameState.wintext = game.add.text(400, 100, 'You win! \n Thanks for playing \n this prototype.');
+    mainGameState.wintext.smoothed = true;
+    mainGameState.wintext.anchor.setTo(.5, .5);
+    mainGameState.wintext.align = "center";
+    mainGameState.wintext.fixedToCamera = true;
+    mainGameState.wintext.font = 'Arial Black';
+    mainGameState.wintext.fontSize = 50;
+    mainGameState.wintext.fill = '#000000';
 }
 
 mainGameState.playerIndicator = function () {
